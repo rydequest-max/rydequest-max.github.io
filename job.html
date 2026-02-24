@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Details — RydeQuest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+body.loading{opacity:0}
+body.loaded{opacity:1;transition:opacity .5s ease}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628;--navy-mid:#111d35;--navy-light:#182744;
+  --gold:#c8a84e;--gold-light:#e0c97a;--gold-pale:#f5ecd3;
+  --white:#ffffff;--off-white:#f7f8fa;
+  --grey-100:#e8ecf1;--grey-200:#c5cdd8;--grey-500:#6b7a8d;--grey-700:#3a4553;
+  --font-sans:'Inter',system-ui,-apple-system,sans-serif;
+  --font-serif:'Playfair Display',Georgia,serif;
+  --max-w:1200px;--transition:0.3s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);color:var(--grey-700);background:var(--off-white);line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-sans);font-weight:600;font-size:.95rem;padding:14px 32px;border-radius:6px;border:none;cursor:pointer;transition:var(--transition)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 25px rgba(200,168,78,.35)}
+.btn-navy{background:var(--navy);color:var(--white)}
+.btn-navy:hover{background:var(--navy-mid);transform:translateY(-2px);box-shadow:0 8px 25px rgba(10,22,40,.3)}
+.btn-outline-dark{background:transparent;color:var(--navy);border:2px solid var(--grey-200)}
+.btn-outline-dark:hover{border-color:var(--navy);background:var(--navy);color:var(--white)}
+
+/* ═══ NAVBAR ═══ */
+.navbar{background:var(--navy);position:sticky;top:0;z-index:1000;box-shadow:0 2px 30px rgba(0,0,0,.2)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-weight:800;font-size:1.05rem;color:var(--navy)}
+.logo-text{font-weight:800;font-size:1.2rem;color:var(--white);letter-spacing:-.5px}
+.logo-text span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:rgba(255,255,255,.75);font-size:.88rem;font-weight:500;transition:var(--transition)}
+.nav-links a:hover{color:var(--white)}
+.nav-cta .btn{padding:10px 24px;font-size:.85rem}
+
+/* ═══ BREADCRUMB ═══ */
+.breadcrumb{padding:20px 0;font-size:.85rem}
+.breadcrumb a{color:var(--grey-500);transition:var(--transition)}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb .sep{margin:0 10px;color:var(--grey-200)}
+.breadcrumb .current{color:var(--navy);font-weight:600}
+
+/* ═══ JOB HERO ═══ */
+.job-hero{background:var(--navy);padding:56px 0 48px;position:relative;overflow:hidden}
+.job-hero::before{content:'';position:absolute;top:-40%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(200,168,78,.08),transparent 70%);border-radius:50%}
+.job-hero::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(200,168,78,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,78,.03) 1px,transparent 1px);background-size:50px 50px}
+.job-hero-inner{position:relative;z-index:1}
+.job-hero .badge{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 18px;border-radius:40px;background:rgba(200,168,78,.15);color:var(--gold);margin-bottom:20px}
+.job-hero .badge svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2}
+.job-hero h1{font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);font-weight:800;color:var(--white);margin-bottom:12px;line-height:1.1}
+.job-hero .company{font-size:1.1rem;color:rgba(255,255,255,.5);margin-bottom:28px}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap}
+.meta-chip{display:flex;align-items:center;gap:7px;font-size:.88rem;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);padding:10px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.06);transition:var(--transition)}
+.meta-chip svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.5;flex-shrink:0}
+.meta-chip.salary{color:var(--gold);font-weight:700;background:rgba(200,168,78,.1);border-color:rgba(200,168,78,.2)}
+.meta-chip.posted{color:rgba(255,255,255,.45);background:transparent;border:none;padding-left:0}
+
+/* ═══ MAIN LAYOUT ═══ */
+.job-layout{display:grid;grid-template-columns:1fr 380px;gap:36px;padding:48px 0 80px;align-items:start}
+.job-main{background:var(--white);border-radius:16px;padding:48px;border:1px solid var(--grey-100);box-shadow:0 4px 20px rgba(10,22,40,.04)}
+.job-sidebar{position:sticky;top:90px}
+
+/* ═══ CONTENT SECTIONS ═══ */
+.section{margin-bottom:40px}
+.section:last-child{margin-bottom:0}
+.section h2{font-family:var(--font-serif);font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.section h2 .icon{width:32px;height:32px;background:var(--gold-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section h2 .icon svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2}
+.section p{font-size:.95rem;color:var(--grey-700);line-height:1.8}
+.section ul{padding:0}
+.section ul li{position:relative;padding-left:28px;margin-bottom:12px;font-size:.92rem;color:var(--grey-700);line-height:1.7;list-style:none}
+.section ul li::before{content:'';position:absolute;left:0;top:10px;width:10px;height:10px;border-radius:50%;background:var(--gold);opacity:.4}
+.divider{height:1px;background:var(--grey-100);margin:40px 0}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar-card{background:var(--white);border-radius:16px;padding:32px;border:1px solid var(--grey-100);box-shadow:0 4px 20px rgba(10,22,40,.04);margin-bottom:20px}
+.sidebar-card h3{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:20px}
+.sidebar-detail{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.sidebar-detail:last-child{margin-bottom:0}
+.sidebar-detail .sd-icon{width:36px;height:36px;background:var(--gold-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-detail .sd-icon svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.sidebar-detail .sd-label{font-size:.78rem;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.sidebar-detail .sd-value{font-size:.92rem;font-weight:600;color:var(--navy)}
+.sidebar-apply{width:100%;margin-top:20px;padding:16px;font-size:1rem;justify-content:center}
+.sidebar-share{display:flex;gap:8px;margin-top:12px}
+.sidebar-share button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--grey-100);background:var(--white);font-family:var(--font-sans);font-size:.82rem;font-weight:600;color:var(--grey-500);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--transition)}
+.sidebar-share button:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,78,.03)}
+.sidebar-share button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* Similar roles */
+.similar-card{display:block;padding:16px;border-radius:10px;border:1px solid var(--grey-100);margin-bottom:10px;transition:var(--transition)}
+.similar-card:hover{border-color:rgba(200,168,78,.3);background:rgba(200,168,78,.03);transform:translateX(4px)}
+.similar-card h4{font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.similar-card p{font-size:.8rem;color:var(--grey-500)}
+.similar-card .sim-salary{font-size:.82rem;font-weight:700;color:var(--gold);margin-top:6px}
+
+/* ═══ APPLY SECTION ═══ */
+.apply-section{background:var(--white);border-radius:16px;padding:48px;border:1px solid var(--grey-100);box-shadow:0 4px 20px rgba(10,22,40,.04);margin-top:36px}
+.apply-section h2{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:8px}
+.apply-section .subtitle{font-size:.92rem;color:var(--grey-500);margin-bottom:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--grey-700);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:13px 16px;border:1px solid var(--grey-100);border-radius:8px;font-family:var(--font-sans);font-size:.9rem;color:var(--navy);transition:var(--transition);background:var(--off-white)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,168,78,.15);background:var(--white)}
+.form-group textarea{resize:vertical;min-height:100px}
+.file-upload{border:2px dashed var(--grey-200);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--white)}
+.file-upload:hover{border-color:var(--gold);background:rgba(200,168,78,.02)}
+.file-upload svg{width:36px;height:36px;stroke:var(--grey-200);fill:none;stroke-width:1.5;margin:0 auto 10px}
+.file-upload p{font-size:.88rem;color:var(--grey-500)}
+.file-upload p span{color:var(--gold);font-weight:600}
+.file-upload input{display:none}
+.file-name{font-size:.85rem;color:var(--gold);font-weight:600;margin-top:8px}
+.form-submit{width:100%;margin-top:8px;padding:16px;font-size:1rem;justify-content:center}
+.success-msg{display:none;text-align:center;padding:40px}
+.success-icon{width:72px;height:72px;border-radius:50%;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.success-icon svg{width:36px;height:36px;stroke:var(--gold);fill:none;stroke-width:2.5}
+.success-msg h3{font-family:var(--font-serif);font-size:1.6rem;color:var(--navy);margin-bottom:10px}
+.success-msg p{color:var(--grey-500);font-size:1rem;line-height:1.7;max-width:440px;margin:0 auto}
+.success-msg .btn{margin-top:24px}
+
+/* ═══ FOOTER ═══ */
+.footer{background:var(--navy);padding:48px 0 24px;margin-top:0;border-top:1px solid rgba(200,168,78,.15)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer .logo-text{font-size:1.1rem}
+.footer p{font-size:.82rem;color:rgba(255,255,255,.3)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:.85rem;color:rgba(255,255,255,.5);transition:var(--transition)}
+.footer-links a:hover{color:var(--white)}
+
+/* ═══ SCROLL TO TOP ═══ */
+.scroll-top{position:fixed;bottom:32px;right:32px;width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--navy);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(200,168,78,.35);z-index:900;opacity:0;transform:translateY(20px);pointer-events:none;transition:var(--transition)}
+.scroll-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+.scroll-top:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(200,168,78,.5)}
+.scroll-top svg{width:18px;height:18px;stroke:var(--navy);fill:none;stroke-width:2.5}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .job-layout{grid-template-columns:1fr}
+  .job-sidebar{position:static}
+}
+@media(max-width:600px){
+  .job-hero{padding:40px 0 36px}
+  .job-main,.apply-section,.sidebar-card{padding:28px 20px}
+  .form-row{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body class="loading">
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">RQ</div>
+      <div class="logo-text">Ryde<span>Quest</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#about">About</a>
+      <a href="index.html#sectors">Sectors</a>
+      <a href="index.html#jobs">Opportunities</a>
+      <a href="index.html#contact">Contact</a>
+    </div>
+    <div class="nav-cta"><a href="index.html#contact" class="btn btn-gold">Get in Touch</a></div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="container">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a>
+    <span class="sep">/</span>
+    <a href="index.html#jobs">Opportunities</a>
+    <span class="sep">/</span>
+    <span class="current" id="bcTitle">Loading...</span>
+  </div>
+</div>
+
+<!-- JOB HERO -->
+<section class="job-hero">
+  <div class="container job-hero-inner">
+    <div class="badge" id="heroSector"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> <span></span></div>
+    <h1 id="heroTitle"></h1>
+    <div class="company" id="heroCompany"></div>
+    <div class="meta-row" id="heroMeta"></div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  <div class="job-layout">
+    <!-- LEFT: JOB DETAILS -->
+    <div>
+      <div class="job-main">
+        <div class="section">
+          <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> About the Role</h2>
+          <p id="secAbout"></p>
+        </div>
+        <div class="divider"></div>
+        <div class="section">
+          <h2><span class="icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Key Responsibilities</h2>
+          <ul id="secResp"></ul>
+        </div>
+        <div class="divider"></div>
+        <div class="section">
+          <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Requirements</h2>
+          <ul id="secReq"></ul>
+        </div>
+        <div class="divider"></div>
+        <div class="section">
+          <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span> What We Offer</h2>
+          <ul id="secBenefits"></ul>
+        </div>
+      </div>
+
+      <!-- APPLY FORM -->
+      <div class="apply-section" id="applySection">
+        <h2>Apply for This Position</h2>
+        <p class="subtitle">Complete the form below and a RydeQuest consultant will review your application within 48 hours.</p>
+        <form id="applyForm" onsubmit="submitApplication(event)">
+          <div class="form-row">
+            <div class="form-group"><label>Full Name *</label><input type="text" placeholder="Your full name" required></div>
+            <div class="form-group"><label>Email Address *</label><input type="email" placeholder="you@email.com" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone Number *</label><input type="tel" placeholder="+971 ..." required></div>
+            <div class="form-group"><label>Current Location</label><input type="text" placeholder="e.g. Dubai, UAE"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Current Job Title</label><input type="text" placeholder="e.g. Senior Engineer"></div>
+            <div class="form-group">
+              <label>Years of Relevant Experience</label>
+              <select><option value="">Select...</option><option>1 – 3 years</option><option>3 – 5 years</option><option>5 – 8 years</option><option>8 – 12 years</option><option>12+ years</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Upload CV / Resume *</label>
+            <div class="file-upload" onclick="this.querySelector('input').click()">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p>Click to upload or drag and drop<br><span>PDF, DOC, DOCX</span> (max 5MB)</p>
+              <input type="file" accept=".pdf,.doc,.docx" onchange="showFileName(this)">
+              <div class="file-name" id="fileName"></div>
+            </div>
+          </div>
+          <div class="form-group"><label>Cover Note (optional)</label><textarea placeholder="Briefly tell us why you're interested in this role and what makes you a strong fit..."></textarea></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Notice Period</label>
+              <select><option value="">Select...</option><option>Immediately available</option><option>1 month</option><option>2 months</option><option>3 months</option><option>Other</option></select>
+            </div>
+            <div class="form-group"><label>Salary Expectation (AED/month)</label><input type="text" placeholder="e.g. 30,000 – 35,000"></div>
+          </div>
+          <button type="submit" class="btn btn-gold form-submit">Submit Application <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </form>
+        <div class="success-msg" id="successMsg">
+          <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <h3>Application Submitted!</h3>
+          <p>Thank you for your interest. A RydeQuest consultant will review your application and be in touch within 48 hours.</p>
+          <a href="index.html#jobs" class="btn btn-navy">Browse More Roles</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div class="job-sidebar">
+      <div class="sidebar-card">
+        <h3>Job Summary</h3>
+        <div class="sidebar-detail">
+          <div class="sd-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><div class="sd-label">Location</div><div class="sd-value" id="sdLocation"></div></div>
+        </div>
+        <div class="sidebar-detail">
+          <div class="sd-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <div><div class="sd-label">Experience</div><div class="sd-value" id="sdExp"></div></div>
+        </div>
+        <div class="sidebar-detail">
+          <div class="sd-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div><div class="sd-label">Job Type</div><div class="sd-value" id="sdType"></div></div>
+        </div>
+        <div class="sidebar-detail">
+          <div class="sd-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div><div class="sd-label">Salary Range</div><div class="sd-value" id="sdSalary"></div></div>
+        </div>
+        <div class="sidebar-detail">
+          <div class="sd-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div><div class="sd-label">Posted</div><div class="sd-value" id="sdPosted"></div></div>
+        </div>
+        <button class="btn btn-gold sidebar-apply" onclick="document.getElementById('applySection').scrollIntoView({behavior:'smooth'})">Apply Now <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        <div class="sidebar-share">
+          <button onclick="navigator.clipboard.writeText(window.location.href);this.textContent='Copied!'"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copy Link</button>
+          <button onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(window.location.href),'_blank')"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> LinkedIn</button>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Similar Roles</h3>
+        <div id="similarRoles"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="logo">
+      <div class="logo-mark">RQ</div>
+      <div class="logo-text">Ryde<span>Quest</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="index.html#about">About</a>
+      <a href="index.html#sectors">Sectors</a>
+      <a href="index.html#jobs">Opportunities</a>
+      <a href="index.html#contact">Contact</a>
+    </div>
+    <p>&copy; 2026 RydeQuest. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="jobs-data.js"></script>
+<script>
+// Page load animation
+window.addEventListener('DOMContentLoaded',()=>{
+  requestAnimationFrame(()=>{document.body.classList.remove('loading');document.body.classList.add('loaded')});
+});
+// Scroll to top
+const scrollBtn=document.getElementById('scrollTop');
+window.addEventListener('scroll',()=>{scrollBtn.classList.toggle('visible',window.scrollY>400)});
+
+// Get job ID from URL
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get('id');
+const job = getJobById(jobId);
+
+if (!job) {
+  document.querySelector('.job-hero-inner').innerHTML = '<h1 style="color:var(--white)">Job Not Found</h1><p style="color:rgba(255,255,255,.5);margin-top:12px">This position may have been filled or removed. <a href="index.html#jobs" style="color:var(--gold)">Browse all open roles</a></p>';
+  document.querySelector('.job-layout').style.display = 'none';
+} else {
+  // Page title
+  document.title = job.title + ' — RydeQuest';
+
+  // Breadcrumb
+  document.getElementById('bcTitle').textContent = job.title;
+
+  // Hero
+  document.getElementById('heroSector').querySelector('span').textContent = job.sector;
+  document.getElementById('heroTitle').textContent = job.title;
+  document.getElementById('heroCompany').textContent = job.company;
+
+  const metaHTML = `
+    <div class="meta-chip"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${job.location}</div>
+    <div class="meta-chip"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>${job.exp}</div>
+    <div class="meta-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${job.type}</div>
+    <div class="meta-chip salary"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>${job.salary}</div>
+    <div class="meta-chip posted"><svg viewBox="0 0 24 24" style="stroke:rgba(255,255,255,.35)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Posted ${job.posted}</div>
+  `;
+  document.getElementById('heroMeta').innerHTML = metaHTML;
+
+  // Content
+  document.getElementById('secAbout').textContent = job.about;
+  document.getElementById('secResp').innerHTML = job.responsibilities.map(r => '<li>' + r + '</li>').join('');
+  document.getElementById('secReq').innerHTML = job.requirements.map(r => '<li>' + r + '</li>').join('');
+  document.getElementById('secBenefits').innerHTML = job.benefits.map(b => '<li>' + b + '</li>').join('');
+
+  // Sidebar
+  document.getElementById('sdLocation').textContent = job.location;
+  document.getElementById('sdExp').textContent = job.exp;
+  document.getElementById('sdType').textContent = job.type;
+  document.getElementById('sdSalary').textContent = job.salary;
+  document.getElementById('sdPosted').textContent = job.posted;
+
+  // Similar roles
+  const similar = JOBS.filter(j => j.sector === job.sector && j.id !== job.id).slice(0, 3);
+  const simEl = document.getElementById('similarRoles');
+  if (similar.length === 0) {
+    simEl.innerHTML = '<p style="font-size:.88rem;color:var(--grey-500)">No similar roles at this time.</p>';
+  } else {
+    simEl.innerHTML = similar.map(s => `
+      <a href="job.html?id=${s.id}" class="similar-card">
+        <h4>${s.title}</h4>
+        <p>${s.location} &middot; ${s.exp}</p>
+        <div class="sim-salary">${s.salary}</div>
+      </a>
+    `).join('');
+  }
+}
+
+// Form
+function showFileName(input) {
+  document.getElementById('fileName').textContent = input.files[0]?.name || '';
+}
+function submitApplication(e) {
+  e.preventDefault();
+  document.getElementById('applyForm').style.display = 'none';
+  document.querySelector('.apply-section .subtitle').style.display = 'none';
+  document.querySelector('.apply-section h2').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+}
+</script>
+</body>
+</html>
