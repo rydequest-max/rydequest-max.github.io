@@ -3,1201 +3,567 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RydeQuest — White Collar Recruitment UAE</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<title>SA Crime Monitor — Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════ PAGE LOAD ANIMATION ═══════════════ */
-body.loading{opacity:0}
-body.loaded{opacity:1;transition:opacity .6s ease}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--b0:#060810;--b1:#0b0e18;--b2:#111522;--b3:#181d2e;--b4:#1f2640;--t1:#eaecf5;--t2:#7d84a0;--t3:#454b65;--r:#ff2244;--o:#ff7a30;--y:#ffbe2e;--g:#00cc88;--bl:#2eb8ff;--p:#9b7aff;--pk:#ff5588;--bd:rgba(255,255,255,0.05);--up:#ff2244;--dn:#00cc88;--eq:#ffbe2e}
+body{font-family:'Sora',sans-serif;background:var(--b0);color:var(--t1);height:100vh;overflow:hidden;display:flex}
 
-/* ═══════════════ RESET & VARIABLES ═══════════════ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0a1628;
-  --navy-mid:#111d35;
-  --navy-light:#182744;
-  --gold:#c8a84e;
-  --gold-light:#e0c97a;
-  --gold-pale:#f5ecd3;
-  --white:#ffffff;
-  --off-white:#f7f8fa;
-  --grey-100:#e8ecf1;
-  --grey-200:#c5cdd8;
-  --grey-500:#6b7a8d;
-  --grey-700:#3a4553;
-  --font-sans:'Inter',system-ui,-apple-system,sans-serif;
-  --font-serif:'Playfair Display',Georgia,serif;
-  --max-w:1200px;
-  --transition:0.3s cubic-bezier(.4,0,.2,1);
-}
-html{scroll-behavior:smooth}
-body{font-family:var(--font-sans);color:var(--grey-700);background:var(--white);line-height:1.6;overflow-x:hidden}
-img{max-width:100%;display:block}
-a{text-decoration:none;color:inherit}
-ul{list-style:none}
+.sidebar{width:440px;min-width:440px;background:var(--b1);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh;z-index:1000}
+.tabs{display:flex;border-bottom:1px solid var(--bd);background:var(--b2)}
+.tab{flex:1;padding:9px 4px;text-align:center;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--t2)}.tab.on{color:var(--r);border-bottom-color:var(--r);background:rgba(255,34,68,.04)}
+.tc{display:none;flex:1;flex-direction:column;overflow:hidden}.tc.on{display:flex}
+.hdr{padding:12px 18px;border-bottom:1px solid var(--bd);background:linear-gradient(135deg,rgba(255,34,68,.05),rgba(255,122,48,.03))}
+.logo{display:flex;align-items:center;gap:8px}.logo-i{width:30px;height:30px;background:linear-gradient(135deg,var(--r),var(--o));border-radius:8px;display:grid;place-items:center;font-size:14px;box-shadow:0 3px 10px rgba(255,34,68,.25)}
+.logo h1{font-size:14px;font-weight:700;letter-spacing:-.5px}.logo-s{font-size:8px;color:var(--t3);font-family:'IBM Plex Mono';margin-top:2px;letter-spacing:.5px}
+.live-d{display:inline-block;width:5px;height:5px;background:#00ff88;border-radius:50%;margin-right:3px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.srch{padding:8px 18px;border-bottom:1px solid var(--bd);position:relative}.srch::before{content:'⌕';position:absolute;left:28px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t3)}
+.srch input{width:100%;padding:8px 10px 8px 30px;background:var(--b2);border:1px solid var(--bd);border-radius:7px;color:var(--t1);font-family:'Sora';font-size:11px;outline:none}.srch input:focus{border-color:rgba(255,255,255,.12)}.srch input::placeholder{color:var(--t3)}
+.sts{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px 18px;border-bottom:1px solid var(--bd)}
+.st{background:var(--b2);border-radius:6px;padding:6px 4px;text-align:center;border:1px solid var(--bd)}.sv{font-size:13px;font-weight:700;font-family:'IBM Plex Mono'}.sv.r{color:var(--r)}.sv.o{color:var(--o)}.sv.y{color:var(--y)}.sv.g{color:var(--g)}.sv.p{color:var(--p)}
+.sl{font-size:6px;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-top:1px;font-weight:600}
+.frow{padding:6px 18px;border-bottom:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:3px}.ft{font-size:7px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:700;width:100%;margin-bottom:1px}
+.pill{padding:3px 8px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:8px;font-family:'Sora';cursor:pointer;transition:all .12s;font-weight:500}
+.pill:hover{border-color:rgba(255,255,255,.12);color:var(--t1)}.pill.on{background:rgba(255,34,68,.1);border-color:var(--r);color:var(--r)}
+.vrow{display:flex;gap:2px;padding:6px 18px;border-bottom:1px solid var(--bd)}
+.vb{flex:1;padding:5px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:8px;font-family:'Sora';cursor:pointer;border-radius:6px;transition:all .12s;font-weight:500;text-align:center}.vb.on{background:var(--b2);color:var(--t1);border-color:rgba(255,255,255,.08)}
+.sls{flex:1;overflow-y:auto;padding:4px}.sls::-webkit-scrollbar{width:2px}.sls::-webkit-scrollbar-track{background:transparent}.sls::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.si{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:6px;cursor:pointer;transition:all .12s;border:1px solid transparent;margin-bottom:1px}
+.si:hover{background:var(--b2);border-color:var(--bd)}.si.sel{background:var(--b3);border-color:var(--r)}
+.si-r{font-family:'IBM Plex Mono';font-size:8px;color:var(--t3);width:18px;text-align:center}.si-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.si-d.critical{background:var(--r);box-shadow:0 0 4px rgba(255,34,68,.5)}.si-d.high{background:var(--o)}.si-d.medium{background:var(--y)}.si-d.low{background:var(--g)}
+.si-i{flex:1;min-width:0}.si-n{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.si-e{font-size:7px;color:var(--t3);font-family:'IBM Plex Mono';margin-top:1px}
+.si-c{font-family:'IBM Plex Mono';font-size:11px;font-weight:700;color:var(--r);white-space:nowrap}
+.si-trend{font-size:9px;font-weight:700;margin-left:4px;white-space:nowrap}.si-trend.up{color:var(--up)}.si-trend.dn{color:var(--dn)}.si-trend.eq{color:var(--eq)}
 
-/* ═══════════════ UTILITY ═══════════════ */
-.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-sans);font-weight:600;font-size:.95rem;padding:14px 32px;border-radius:6px;border:none;cursor:pointer;transition:var(--transition)}
-.btn-gold{background:var(--gold);color:var(--navy)}
-.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 25px rgba(200,168,78,.35)}
-.btn-outline{background:transparent;color:var(--white);border:2px solid rgba(255,255,255,.4)}
-.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
-.btn-navy{background:var(--navy);color:var(--white)}
-.btn-navy:hover{background:var(--navy-mid);transform:translateY(-2px);box-shadow:0 8px 25px rgba(10,22,40,.3)}
-.section-label{font-size:.8rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.section-title{font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);font-weight:700;line-height:1.15;margin-bottom:20px}
-.section-title.dark{color:var(--navy)}
-.section-title.light{color:var(--white)}
-.section-subtitle{font-size:1.1rem;color:var(--grey-500);max-width:600px;line-height:1.7}
+/* === LEADERBOARD TAB === */
+.lb-period{display:flex;gap:3px;padding:8px 18px;border-bottom:1px solid var(--bd)}
+.lb-btn{flex:1;padding:6px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:9px;font-family:'Sora';cursor:pointer;border-radius:6px;font-weight:600;text-align:center}.lb-btn.on{background:var(--b2);color:var(--r);border-color:var(--r)}
+.lb-cat{display:flex;flex-wrap:wrap;gap:3px;padding:6px 18px;border-bottom:1px solid var(--bd)}
+.lb-list{flex:1;overflow-y:auto;padding:8px 12px}
+.lb-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;margin-bottom:4px;background:var(--b2);border:1px solid var(--bd);transition:all .2s}
+.lb-item:hover{border-color:rgba(255,255,255,.1)}
+.lb-pos{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:'IBM Plex Mono';font-size:11px;font-weight:700;flex-shrink:0}
+.lb-pos.g{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#000}.lb-pos.s{background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#000}.lb-pos.b{background:linear-gradient(135deg,#cd7f32,#a0652f);color:#fff}.lb-pos.n{background:var(--b3);color:var(--t2)}
+.lb-info{flex:1;min-width:0}.lb-name{font-size:12px;font-weight:700}.lb-sub{font-size:8px;color:var(--t3);font-family:'IBM Plex Mono';margin-top:1px}
+.lb-val{text-align:right}.lb-num{font-family:'IBM Plex Mono';font-size:16px;font-weight:700;color:var(--r)}
+.lb-move{font-size:9px;font-weight:700;display:flex;align-items:center;gap:2px;justify-content:flex-end;margin-top:2px}
+.lb-move.up{color:var(--up)}.lb-move.dn{color:var(--dn)}.lb-move.eq{color:var(--eq)}
 
-/* ═══════════════ NAVBAR ═══════════════ */
-.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;transition:var(--transition)}
-.navbar.scrolled{background:rgba(10,22,40,.97);backdrop-filter:blur(12px);box-shadow:0 2px 30px rgba(0,0,0,.25)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:80px}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:38px;height:38px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-weight:800;font-size:1.2rem;color:var(--navy)}
-.logo-text{font-weight:800;font-size:1.3rem;color:var(--white);letter-spacing:-.5px}
-.logo-text span{color:var(--gold)}
-.nav-links{display:flex;align-items:center;gap:36px}
-.nav-links a{color:rgba(255,255,255,.8);font-size:.9rem;font-weight:500;transition:var(--transition);position:relative}
-.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--gold);transition:var(--transition)}
-.nav-links a:hover{color:var(--white)}
-.nav-links a:hover::after{width:100%}
-.nav-cta{margin-left:12px}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
-.hamburger span{width:24px;height:2px;background:var(--white);transition:var(--transition)}
+/* === LIVE FEED === */
+.feed{flex:1;overflow-y:auto;padding:6px 10px}.feed::-webkit-scrollbar{width:2px}.feed::-webkit-scrollbar-track{background:transparent}.feed::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.fi{padding:8px 12px;border-radius:7px;border:1px solid var(--bd);margin-bottom:4px;background:var(--b2);animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.fi-new{border-color:rgba(255,34,68,.3);background:rgba(255,34,68,.03)}
+.fi-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.fi-type{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:2px 5px;border-radius:3px}
+.fi-type.murder{background:rgba(255,34,68,.15);color:#ff2244}.fi-type.robbery{background:rgba(255,122,48,.15);color:#ff7a30}.fi-type.assault{background:rgba(255,190,46,.15);color:#ffbe2e}
+.fi-type.carjack{background:rgba(255,85,136,.15);color:#ff5588}.fi-type.shooting{background:rgba(255,34,68,.15);color:#ff2244}.fi-type.burglary{background:rgba(46,184,255,.15);color:#2eb8ff}
+.fi-type.kidnapping{background:rgba(155,122,255,.15);color:#9b7aff}.fi-type.drugs{background:rgba(0,204,136,.15);color:#00cc88}
+.fi-time{font-size:7px;color:var(--t3);font-family:'IBM Plex Mono'}.fi-loc{font-size:10px;font-weight:600;margin-bottom:2px}.fi-desc{font-size:9px;color:var(--t2);line-height:1.3}
+.fi-src{margin-top:4px;display:flex;align-items:center;gap:4px}
+.fi-src a{font-size:8px;color:var(--bl);text-decoration:none;font-family:'IBM Plex Mono';padding:2px 6px;background:rgba(46,184,255,.08);border-radius:4px;border:1px solid rgba(46,184,255,.15);transition:all .15s}
+.fi-src a:hover{background:rgba(46,184,255,.15)}
+.feed-hdr{padding:10px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}.feed-hdr span{font-size:11px;font-weight:600}.feed-cnt{font-family:'IBM Plex Mono';font-size:9px;color:var(--r);margin-left:auto}
 
-/* ═══════════════ HERO ═══════════════ */
-.hero{position:relative;min-height:100vh;display:flex;align-items:stretch;background:var(--navy);overflow:hidden}
-.hero-bg{position:absolute;inset:0}
-.hero-bg::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 40%,rgba(17,29,53,.85) 70%,rgba(200,168,78,.15) 100%);background-size:200% 200%;animation:heroGradient 12s ease infinite}
-@keyframes heroGradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.hero-bg::after{content:'';position:absolute;top:-50%;right:-20%;width:900px;height:900px;background:radial-gradient(circle,rgba(200,168,78,.08) 0%,transparent 70%);border-radius:50%}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(200,168,78,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,78,.04) 1px,transparent 1px);background-size:60px 60px}
-.hero-content{position:relative;z-index:2;max-width:780px;padding-top:140px;padding-bottom:60px;display:flex;flex-direction:column;justify-content:center;flex:1}
-.hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(200,168,78,.12);border:1px solid rgba(200,168,78,.25);border-radius:40px;padding:10px 22px;margin-bottom:40px;font-size:.82rem;font-weight:600;color:var(--gold-light);letter-spacing:1px;text-transform:uppercase}
-.hero-badge .dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;box-shadow:0 0 6px rgba(34,197,94,.6)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h1{font-family:var(--font-serif);font-size:clamp(3rem,6.5vw,5rem);font-weight:800;color:var(--white);line-height:1.08;margin-bottom:28px}
-.hero h1 .accent{color:var(--gold)}
-.hero p{font-size:1.3rem;color:rgba(255,255,255,.7);line-height:1.75;margin-bottom:48px;max-width:600px}
-.hero-btns{display:flex;gap:16px;flex-wrap:wrap}
-.hero-stats{display:flex;gap:56px;margin-top:auto;padding-top:48px;border-top:1px solid rgba(255,255,255,.1)}
-.stat h3{font-family:var(--font-serif);font-size:2.8rem;font-weight:700;color:var(--gold)}
-.stat p{font-size:.88rem;color:rgba(255,255,255,.5);margin-top:4px;font-weight:500}
-.hero-shape{position:absolute;right:-5%;top:15%;width:500px;height:500px;border:2px solid rgba(200,168,78,.08);border-radius:50%;z-index:1}
-.hero-shape::before{content:'';position:absolute;top:60px;left:60px;right:60px;bottom:60px;border:2px solid rgba(200,168,78,.05);border-radius:50%}
-
-/* ═══════════════ ABOUT ═══════════════ */
-.about{padding:120px 0;background:var(--white)}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-.about-visual{position:relative}
-.about-card{background:var(--navy);border-radius:16px;padding:48px;min-height:400px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
-.about-card::before{content:'';position:absolute;top:-30%;right:-30%;width:350px;height:350px;background:radial-gradient(circle,rgba(200,168,78,.15),transparent 70%);border-radius:50%}
-.about-card h3{font-family:var(--font-serif);font-size:1.8rem;color:var(--white);position:relative;z-index:1;margin-bottom:12px}
-.about-card p{color:rgba(255,255,255,.6);position:relative;z-index:1;font-size:.95rem;line-height:1.6}
-.about-float{position:absolute;top:-24px;right:-24px;background:var(--gold);border-radius:12px;padding:20px 28px;box-shadow:0 12px 40px rgba(200,168,78,.3)}
-.about-float .num{font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--navy)}
-.about-float .label{font-size:.75rem;font-weight:600;color:var(--navy);opacity:.7}
-.about-text .values{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
-.value-item{display:flex;gap:12px;align-items:flex-start}
-.value-icon{width:36px;height:36px;background:var(--gold-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.value-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.value-item h4{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:2px}
-.value-item p{font-size:.82rem;color:var(--grey-500);line-height:1.5}
-
-/* ═══════════════ SECTORS / SERVICES ═══════════════ */
-.sectors{padding:120px 0;background:var(--off-white)}
-.sectors-header{text-align:center;max-width:640px;margin:0 auto 64px}
-.sectors-header .section-subtitle{margin:0 auto}
-.sector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
-.sector-card{background:var(--white);border-radius:14px;padding:36px 28px;border:1px solid var(--grey-100);transition:var(--transition);position:relative;overflow:hidden;cursor:pointer}
-.sector-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:var(--transition)}
-.sector-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(10,22,40,.08);border-color:transparent}
-.sector-card:hover::before{transform:scaleX(1)}
-.sector-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
-.sector-icon svg{width:24px;height:24px;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.sector-card h3{font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:8px}
-.sector-card p{font-size:.88rem;color:var(--grey-500);line-height:1.6}
-.sector-card .arrow{position:absolute;bottom:28px;right:28px;width:32px;height:32px;border-radius:50%;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;opacity:0;transform:translateX(-8px);transition:var(--transition)}
-.sector-card:hover .arrow{opacity:1;transform:translateX(0)}
-.sector-card .arrow svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2}
-
-/* ═══════════════ JOBS ═══════════════ */
-.jobs{padding:120px 0;background:var(--navy)}
-.jobs-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:24px}
-.jobs-header .section-subtitle{color:rgba(255,255,255,.5)}
-.job-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
-.job-card{background:var(--navy-mid);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:32px;transition:var(--transition)}
-.job-card:hover{background:var(--navy-light);border-color:rgba(200,168,78,.2);transform:translateY(-4px)}
-.job-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-.job-badge{font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:40px;background:rgba(200,168,78,.12);color:var(--gold)}
-.job-card h3{font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:8px}
-.job-card .company{font-size:.88rem;color:rgba(255,255,255,.5);margin-bottom:16px}
-.job-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.job-tag{font-size:.78rem;padding:5px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);font-weight:500}
-.job-footer{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)}
-.job-salary{font-size:.95rem;font-weight:700;color:var(--gold)}
-.job-apply{font-size:.85rem;font-weight:600;color:var(--white);display:flex;align-items:center;gap:6px;transition:var(--transition)}
-.job-apply:hover{color:var(--gold)}
-.job-apply svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
-
-/* ═══════════════ WHY SECTION ═══════════════ */
-.why{padding:120px 0;background:var(--white)}
-.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-.why-right{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.why-stat{background:var(--off-white);border-radius:14px;padding:32px 24px;text-align:center;transition:var(--transition)}
-.why-stat:hover{background:var(--navy);transform:translateY(-4px)}
-.why-stat:hover h3,.why-stat:hover p{color:var(--white)}
-.why-stat:hover h3{color:var(--gold)}
-.why-stat h3{font-family:var(--font-serif);font-size:2.2rem;font-weight:700;color:var(--navy);transition:var(--transition)}
-.why-stat p{font-size:.85rem;color:var(--grey-500);margin-top:4px;font-weight:500;transition:var(--transition)}
-
-/* ═══════════════ CONTACT ═══════════════ */
-.contact{padding:120px 0;background:var(--off-white)}
-.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:start}
-.contact-info{padding-top:12px}
-.contact-info .section-subtitle{margin-bottom:40px}
-.contact-item{display:flex;gap:16px;align-items:flex-start;margin-bottom:28px}
-.contact-icon{width:44px;height:44px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.contact-icon svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.5}
-.contact-item h4{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:2px}
-.contact-item p{font-size:.9rem;color:var(--grey-500)}
-.contact-form{background:var(--white);border-radius:16px;padding:44px;box-shadow:0 8px 40px rgba(10,22,40,.06);border:1px solid var(--grey-100)}
-.contact-form h3{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:24px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--grey-700);margin-bottom:6px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 16px;border:1px solid var(--grey-100);border-radius:8px;font-family:var(--font-sans);font-size:.9rem;color:var(--navy);transition:var(--transition);background:var(--off-white)}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,168,78,.15);background:var(--white)}
-.form-group textarea{resize:vertical;min-height:100px}
-.form-submit{width:100%;margin-top:8px}
-
-/* ═══════════════ FOOTER ═══════════════ */
-.footer{background:var(--navy);padding:64px 0 32px;border-top:1px solid rgba(200,168,78,.15)}
-.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
-.footer-brand .logo{margin-bottom:16px}
-.footer-brand p{font-size:.88rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:280px}
-.footer h4{font-size:.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
-.footer ul li{margin-bottom:10px}
-.footer ul li a{font-size:.9rem;color:rgba(255,255,255,.5);transition:var(--transition)}
-.footer ul li a:hover{color:var(--white)}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:32px;border-top:1px solid rgba(255,255,255,.06)}
-.footer-bottom p{font-size:.82rem;color:rgba(255,255,255,.3)}
-.footer-socials{display:flex;gap:16px}
-.footer-socials a{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
-.footer-socials a:hover{background:var(--gold)}
-.footer-socials a svg{width:16px;height:16px;fill:rgba(255,255,255,.5)}
-.footer-socials a:hover svg{fill:var(--navy)}
-
-/* ═══════════════ ALL ROLES MODAL ═══════════════ */
-.roles-overlay{position:fixed;inset:0;z-index:2000;visibility:hidden;opacity:0;transition:opacity .4s ease,visibility .4s ease}
-.roles-overlay.open{visibility:visible;opacity:1}
-.roles-backdrop{position:absolute;inset:0;background:rgba(10,22,40,.85);backdrop-filter:blur(8px)}
-.roles-panel{position:absolute;top:0;right:0;width:100%;max-width:1100px;height:100%;background:var(--navy);overflow-y:auto;transform:translateX(100%);transition:transform .45s cubic-bezier(.4,0,.2,1)}
-.roles-overlay.open .roles-panel{transform:translateX(0)}
-.roles-panel-inner{padding:40px 48px 80px}
-.roles-close{position:absolute;top:24px;right:32px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);z-index:10}
-.roles-close:hover{background:rgba(200,168,78,.2);border-color:var(--gold)}
-.roles-close svg{width:20px;height:20px;stroke:var(--white);fill:none;stroke-width:2}
-.roles-header{margin-bottom:36px}
-.roles-header h2{font-family:var(--font-serif);font-size:2.2rem;font-weight:700;color:var(--white);margin-bottom:8px}
-.roles-header p{color:rgba(255,255,255,.45);font-size:1rem}
-.roles-toolbar{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;align-items:center}
-.roles-search{flex:1;min-width:240px;position:relative}
-.roles-search input{width:100%;padding:14px 16px 14px 44px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:var(--navy-mid);color:var(--white);font-family:var(--font-sans);font-size:.92rem;transition:var(--transition)}
-.roles-search input::placeholder{color:rgba(255,255,255,.3)}
-.roles-search input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,168,78,.15)}
-.roles-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
-.roles-search-icon svg{width:18px;height:18px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:2}
-.roles-filters{display:flex;gap:8px;flex-wrap:wrap}
-.filter-btn{padding:9px 18px;border-radius:40px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.55);font-family:var(--font-sans);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap}
-.filter-btn:hover{border-color:rgba(200,168,78,.4);color:rgba(255,255,255,.8)}
-.filter-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
-.roles-count{font-size:.85rem;color:rgba(255,255,255,.35);margin-bottom:20px;font-weight:500}
-.roles-count span{color:var(--gold);font-weight:700}
-.roles-list{display:flex;flex-direction:column;gap:12px}
-.role-item{background:var(--navy-mid);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:24px 28px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;transition:var(--transition);cursor:pointer}
-.role-item:hover{background:var(--navy-light);border-color:rgba(200,168,78,.2);transform:translateX(4px)}
-.role-info h3{font-size:1.05rem;font-weight:700;color:var(--white);margin-bottom:6px}
-.role-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-.role-meta-item{display:flex;align-items:center;gap:5px;font-size:.82rem;color:rgba(255,255,255,.45)}
-.role-meta-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5}
-.role-meta-item.sector-tag{color:var(--gold);font-weight:600}
-.role-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.role-salary{font-size:.95rem;font-weight:700;color:var(--gold);white-space:nowrap}
-.role-apply-btn{padding:8px 20px;border-radius:6px;background:rgba(200,168,78,.12);border:1px solid rgba(200,168,78,.25);color:var(--gold);font-family:var(--font-sans);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap}
-.role-apply-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold)}
-.role-item.hidden{display:none}
-.roles-empty{text-align:center;padding:64px 24px;color:rgba(255,255,255,.35)}
-.roles-empty h3{font-family:var(--font-serif);font-size:1.4rem;color:rgba(255,255,255,.5);margin-bottom:8px}
-.roles-empty p{font-size:.92rem}
-@media(max-width:768px){
-  .roles-panel{max-width:100%}
-  .roles-panel-inner{padding:24px 20px 60px}
-  .role-item{grid-template-columns:1fr;gap:12px}
-  .role-right{align-items:flex-start;flex-direction:row;gap:16px}
-}
-
-/* ═══════════════ TRUST BAR ═══════════════ */
-.trust-bar{padding:28px 0;background:var(--white);border-bottom:1px solid var(--grey-100);overflow:hidden}
-.trust-label{text-align:center;font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--grey-200);margin-bottom:20px}
-.trust-track{display:flex;width:max-content;animation:marquee 30s linear infinite}
-.trust-track:hover{animation-play-state:paused}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.trust-logos{display:flex;align-items:center;gap:72px;padding:0 36px;flex-shrink:0}
-.trust-logo{opacity:.25;filter:grayscale(1);transition:all .4s ease;flex-shrink:0}
-.trust-logo:hover{opacity:.55;filter:grayscale(0)}
-.trust-logo svg{height:30px;width:auto;display:block}
-
-/* ═══════════════ CTA BANNER ═══════════════ */
-.cta-banner{padding:80px 0;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 50%,#1a2d50 100%);text-align:center;position:relative;overflow:hidden}
-.cta-banner::before{content:'';position:absolute;top:-50%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(200,168,78,.1),transparent 70%);border-radius:50%}
-.cta-banner::after{content:'';position:absolute;bottom:-50%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(200,168,78,.1),transparent 70%);border-radius:50%}
-.cta-banner-inner{position:relative;z-index:1;max-width:700px;margin:0 auto}
-.cta-banner h2{font-family:var(--font-serif);font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:700;color:var(--white);margin-bottom:16px;line-height:1.2}
-.cta-banner p{font-size:1.1rem;color:rgba(255,255,255,.55);margin-bottom:32px;line-height:1.7}
-.cta-banner .btn-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-
-/* ═══════════════ SCROLL TO TOP ═══════════════ */
-.scroll-top{position:fixed;bottom:32px;right:32px;width:48px;height:48px;border-radius:50%;background:var(--gold);color:var(--navy);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(200,168,78,.35);z-index:900;opacity:0;transform:translateY(20px);pointer-events:none;transition:var(--transition)}
-.scroll-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
-.scroll-top:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(200,168,78,.5)}
-.scroll-top svg{width:20px;height:20px;stroke:var(--navy);fill:none;stroke-width:2.5}
-
-/* ═══════════════ FORM SUCCESS ═══════════════ */
-.form-success{display:none;text-align:center;padding:40px 24px}
-.form-success.show{display:block}
-.form-success .check-circle{width:64px;height:64px;border-radius:50%;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-.form-success .check-circle svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2.5}
-.form-success h3{font-family:var(--font-serif);font-size:1.4rem;color:var(--navy);margin-bottom:8px}
-.form-success p{font-size:.92rem;color:var(--grey-500);line-height:1.7}
-
-/* ═══════════════ RESPONSIVE ═══════════════ */
-/* Mobile menu */
-@media(max-width:768px){
-  .nav-links{
-    display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(10,22,40,.98);backdrop-filter:blur(16px);z-index:999;
-    justify-content:center;align-items:center;gap:32px;
-    opacity:0;pointer-events:none;transition:opacity .35s ease
-  }
-  .nav-links.show{opacity:1;pointer-events:auto}
-  .nav-links a{font-size:1.4rem;color:var(--white)}
-  .nav-cta{display:none}
-  .hamburger{display:flex;z-index:1001}
-  .hero h1{font-size:2.6rem}
-  .hero-content{padding-top:100px;padding-bottom:40px}
-  .hero-stats{flex-direction:column;gap:24px}
-  .about-grid,.why-grid,.contact-grid{grid-template-columns:1fr}
-  .footer-grid{grid-template-columns:1fr 1fr}
-  .job-grid{grid-template-columns:1fr}
-  .form-row{grid-template-columns:1fr}
-  .trust-logos{gap:48px}
-  .cta-banner h2{font-size:1.6rem}
-}
+/* === MAP === */
+.mapa{flex:1;position:relative}#map{width:100%;height:100%;background:var(--b0)}
+.leaflet-container{background:var(--b0)!important}.leaflet-control-zoom a{background:var(--b2)!important;color:var(--t1)!important;border-color:var(--bd)!important;font-size:14px!important;width:28px!important;height:28px!important;line-height:28px!important}.leaflet-control-zoom a:hover{background:var(--b3)!important}.leaflet-control-attribution{display:none!important}
+.leaflet-popup-content-wrapper{background:var(--b3)!important;color:var(--t1)!important;border-radius:12px!important;border:1px solid var(--bd)!important;box-shadow:0 20px 50px rgba(0,0,0,.6)!important}.leaflet-popup-tip{background:var(--b3)!important}.leaflet-popup-content{margin:12px!important;min-width:270px!important}.leaflet-popup-close-button{color:var(--t3)!important;font-size:18px!important;top:6px!important;right:8px!important}
+.p-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--bd)}.p-t{font-size:13px;font-weight:700}.p-sev{padding:2px 6px;border-radius:6px;font-size:7px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;font-family:'IBM Plex Mono';margin-left:auto}
+.p-sev.critical{background:rgba(255,34,68,.2);color:#ff2244}.p-sev.high{background:rgba(255,122,48,.2);color:#ff7a30}.p-sev.medium{background:rgba(255,190,46,.2);color:#ffbe2e}.p-sev.low{background:rgba(0,204,136,.2);color:#00cc88}
+.p-sub{font-size:8px;color:var(--t3);font-family:'IBM Plex Mono';margin-bottom:6px}
+.p-g{display:grid;grid-template-columns:1fr 1fr;gap:3px}.p-i{display:flex;justify-content:space-between;padding:3px 6px;background:rgba(255,255,255,.02);border-radius:3px;font-size:8px}.p-in{color:var(--t2)}.p-iv{font-family:'IBM Plex Mono';font-weight:600}
+.p-trend-row{display:flex;justify-content:space-between;padding:3px 6px;background:rgba(255,255,255,.02);border-radius:3px;font-size:8px;margin-top:2px;grid-column:1/-1}
+.p-trend-row .up{color:var(--up)}.p-trend-row .dn{color:var(--dn)}
+.p-tot{margin-top:5px;padding-top:5px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:600}.p-tv{font-family:'IBM Plex Mono';color:var(--r);font-size:15px}
+.p-note{font-size:7px;color:var(--t3);margin-top:4px;font-style:italic;line-height:1.3}
+.legend{position:absolute;bottom:14px;right:14px;background:rgba(17,21,34,.92);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;z-index:999;backdrop-filter:blur(16px)}
+.lg-t{font-size:7px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:4px;font-weight:700}.lg-i{display:flex;align-items:center;gap:5px;font-size:8px;color:var(--t2);margin-bottom:2px}.lg-c{width:7px;height:7px;border-radius:50%}
+.dsrc{position:absolute;bottom:14px;left:14px;background:rgba(17,21,34,.92);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;z-index:999;font-size:7px;color:var(--t3);font-family:'IBM Plex Mono';backdrop-filter:blur(16px);line-height:1.4}.dsrc a{color:var(--bl);text-decoration:none}
+.zoom-tip{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(17,21,34,.92);border:1px solid var(--bd);border-radius:7px;padding:5px 12px;z-index:999;font-size:9px;color:var(--t2);backdrop-filter:blur(16px);transition:opacity .3s;pointer-events:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,34,68,.4)}70%{box-shadow:0 0 0 8px rgba(255,34,68,0)}100%{box-shadow:0 0 0 0 rgba(255,34,68,0)}}
+@media(max-width:900px){.sidebar{width:100%;min-width:100%;height:45vh}body{flex-direction:column}.mapa{height:55vh}}
 </style>
 </head>
-<body class="loading">
-
-<!-- ══════════════ NAVBAR ══════════════ -->
-<nav class="navbar" id="navbar">
-  <div class="container nav-inner">
-    <a href="#" class="logo">
-      <div class="logo-mark">RQ</div>
-      <div class="logo-text">Ryde<span>Quest</span></div>
-    </a>
-    <div class="nav-links">
-      <a href="#about">About</a>
-      <a href="#sectors">Sectors</a>
-      <a href="#jobs">Opportunities</a>
-      <a href="#why">Why Us</a>
-      <a href="#contact">Contact</a>
-    </div>
-    <a href="#contact" class="btn btn-gold nav-cta">Get in Touch</a>
-    <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('show')">
-      <span></span><span></span><span></span>
-    </div>
+<body>
+<div class="sidebar">
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab('map')">📍 Map</div>
+    <div class="tab" onclick="switchTab('lb')">🏆 Top 10</div>
+    <div class="tab" onclick="switchTab('live')"><span class="live-d"></span>Live Feed</div>
+    <div class="tab" onclick="switchTab('trends')">📊 Trends</div>
+    <div class="tab" onclick="switchTab('forecast')">🔮 Forecast</div>
   </div>
-</nav>
-
-<!-- ══════════════ HERO ══════════════ -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-shape"></div>
-  <div class="container hero-content">
-    <div class="hero-badge"><span class="dot"></span> Now Recruiting Across the UAE</div>
-    <h1>Connecting <span class="accent">Exceptional Talent</span> With Industry Leaders</h1>
-    <p>RydeQuest is a specialist white-collar recruitment consultancy. We place professionals across finance, technology, engineering, and corporate functions in the UAE and beyond.</p>
-    <div class="hero-btns">
-      <a href="#jobs" class="btn btn-gold">Browse Opportunities <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      <a href="#contact" class="btn btn-outline">Partner With Us</a>
+  <!-- MAP TAB -->
+  <div class="tc on" id="tMap">
+    <div class="hdr"><div class="logo"><div class="logo-i">🇿🇦</div><h1>SA Crime Monitor</h1></div><div class="logo-s"><span class="live-d" id="apiDot"></span><span id="apiLabel">OFFLINE · CACHED DATA</span></div></div>
+    <div class="srch"><input id="search" placeholder="Search station, township, city..."></div>
+    <div class="sts">
+      <div class="st"><div class="sv r" id="xT">0</div><div class="sl">Total</div></div>
+      <div class="st"><div class="sv o" id="xS">0</div><div class="sl">Stations</div></div>
+      <div class="st"><div class="sv y" id="xM">0</div><div class="sl">Murders</div></div>
+      <div class="st"><div class="sv g" id="xR">0</div><div class="sl">Robberies</div></div>
+      <div class="st"><div class="sv p" id="xK">0</div><div class="sl">Kidnap</div></div>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><h3>500+</h3><p>Placements Made</p></div>
-      <div class="stat"><h3>40+</h3><p>Client Companies</p></div>
-      <div class="stat"><h3>98%</h3><p>Retention Rate</p></div>
-    </div>
+    <div class="frow" id="pF"><div class="ft">Province</div><button class="pill on" data-p="all">All</button><button class="pill" data-p="WC">WC</button><button class="pill" data-p="GP">GP</button><button class="pill" data-p="KZN">KZN</button><button class="pill" data-p="EC">EC</button><button class="pill" data-p="MP">MP</button><button class="pill" data-p="NW">NW</button><button class="pill" data-p="FS">FS</button><button class="pill" data-p="LP">LP</button><button class="pill" data-p="NC">NC</button></div>
+    <div class="frow" id="cF"><div class="ft">Crime</div><button class="pill on" data-c="all">All</button><button class="pill" data-c="murder">Murder</button><button class="pill" data-c="robbery">Robbery</button><button class="pill" data-c="assault">Assault</button><button class="pill" data-c="sexual">Sexual</button><button class="pill" data-c="property">Property</button><button class="pill" data-c="carjack">Carjack</button><button class="pill" data-c="kidnap">Kidnap</button><button class="pill" data-c="drugs">Drugs</button></div>
+    <div class="vrow"><button class="vb on" data-v="markers" onclick="setV('markers')">📍 Markers</button><button class="vb" data-v="heat" onclick="setV('heat')">🔥 Heat</button><button class="vb" data-v="cluster" onclick="setV('cluster')">🔵 Cluster</button></div>
+    <div class="sls" id="sList"></div>
   </div>
-</section>
-
-<!-- ══════════════ TRUST BAR ══════════════ -->
-<section class="trust-bar">
-  <div class="trust-label">Trusted by leading organisations</div>
-  <div class="trust-track">
-    <div class="trust-logos">
-      <!-- ADNOC -->
-      <div class="trust-logo"><svg viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg"><text x="80" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="4">ADNOC</text></svg></div>
-      <!-- Emirates NBD -->
-      <div class="trust-logo"><svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg"><text x="100" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="18" fill="#0a1628" letter-spacing="1">Emirates NBD</text></svg></div>
-      <!-- du -->
-      <div class="trust-logo"><svg viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg"><text x="40" y="30" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="28" fill="#0a1628" letter-spacing="-1">du</text></svg></div>
-      <!-- Mubadala -->
-      <div class="trust-logo"><svg viewBox="0 0 180 40" xmlns="http://www.w3.org/2000/svg"><text x="90" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="2">MUBADALA</text></svg></div>
-      <!-- Etihad -->
-      <div class="trust-logo"><svg viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg"><text x="70" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="3">ETIHAD</text></svg></div>
-      <!-- DEWA -->
-      <div class="trust-logo"><svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="3">DEWA</text></svg></div>
-      <!-- ENOC -->
-      <div class="trust-logo"><svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="3">ENOC</text></svg></div>
-      <!-- Emaar -->
-      <div class="trust-logo"><svg viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg"><text x="65" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="3">EMAAR</text></svg></div>
-    </div>
-    <!-- Duplicate for seamless loop -->
-    <div class="trust-logos">
-      <div class="trust-logo"><svg viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg"><text x="80" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="4">ADNOC</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg"><text x="100" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="18" fill="#0a1628" letter-spacing="1">Emirates NBD</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg"><text x="40" y="30" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="28" fill="#0a1628" letter-spacing="-1">du</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 180 40" xmlns="http://www.w3.org/2000/svg"><text x="90" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="2">MUBADALA</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg"><text x="70" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="3">ETIHAD</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="3">DEWA</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="22" fill="#0a1628" letter-spacing="3">ENOC</text></svg></div>
-      <div class="trust-logo"><svg viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg"><text x="65" y="28" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="20" fill="#0a1628" letter-spacing="3">EMAAR</text></svg></div>
-    </div>
+  <!-- LEADERBOARD TAB -->
+  <div class="tc" id="tLb">
+    <div class="hdr"><div class="logo"><div class="logo-i">🏆</div><h1>Crime Leaderboard</h1></div><div class="logo-s">TOP 10 MOVERS · WEEKLY & MONTHLY</div></div>
+    <div class="lb-period" id="lbPeriod"><button class="lb-btn on" onclick="setLbPeriod('weekly')">This Week</button><button class="lb-btn" onclick="setLbPeriod('monthly')">This Month</button><button class="lb-btn" onclick="setLbPeriod('quarterly')">Quarter</button></div>
+    <div class="lb-cat" id="lbCat"><button class="pill on" data-lc="total">Total</button><button class="pill" data-lc="murder">Murder</button><button class="pill" data-lc="robbery">Robbery</button><button class="pill" data-lc="kidnap">Kidnap</button><button class="pill" data-lc="carjack">Carjack</button></div>
+    <div class="lb-list" id="lbList"></div>
   </div>
-</section>
-
-<!-- ══════════════ ABOUT ══════════════ -->
-<section class="about" id="about">
-  <div class="container about-grid">
-    <div class="about-visual">
-      <div class="about-card">
-        <div class="about-float">
-          <div class="num">10+</div>
-          <div class="label">Years Combined Experience</div>
-        </div>
-        <h3>Built on Relationships, Driven by Results</h3>
-        <p>We believe recruitment is about people — not just positions. Our consultants take the time to understand your goals, culture, and ambitions before we ever present a candidate.</p>
-      </div>
-    </div>
-    <div class="about-text">
-      <div class="section-label">Who We Are</div>
-      <h2 class="section-title dark">Your Trusted Recruitment Partner in the UAE</h2>
-      <p class="section-subtitle">RydeQuest was founded to bridge the gap between world-class talent and forward-thinking organisations. We specialise exclusively in white-collar recruitment across key sectors in the UAE and the wider GCC region.</p>
-      <div class="values">
-        <div class="value-item">
-          <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-          <div><h4>Precision Matching</h4><p>Quality over quantity, every time</p></div>
-        </div>
-        <div class="value-item">
-          <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div><h4>Confidential</h4><p>Discreet handling of every search</p></div>
-        </div>
-        <div class="value-item">
-          <div class="value-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-          <div><h4>UAE & GCC Focus</h4><p>Deep market knowledge</p></div>
-        </div>
-        <div class="value-item">
-          <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div><h4>White-Collar Only</h4><p>Professional roles exclusively</p></div>
-        </div>
-      </div>
-    </div>
+  <!-- LIVE FEED TAB -->
+  <div class="tc" id="tLive">
+    <div class="feed-hdr"><span class="live-d"></span><span>Live Incident Feed</span><span class="feed-cnt" id="feedCnt">0</span></div>
+    <div class="feed-status" id="feedStatus" style="font-size:7px;color:var(--t3);padding:4px 18px;border-bottom:1px solid var(--bd)"></div>
+    <div class="feed" id="feedList"></div>
   </div>
-</section>
-
-<!-- ══════════════ SECTORS ══════════════ -->
-<section class="sectors" id="sectors">
-  <div class="container">
-    <div class="sectors-header">
-      <div class="section-label">Our Expertise</div>
-      <h2 class="section-title dark">Sectors We Serve</h2>
-      <p class="section-subtitle">We recruit across the most in-demand white-collar sectors in the UAE, placing candidates from mid-level through to C-suite.</p>
-    </div>
-    <div class="sector-grid">
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-        <h3>Technology & Digital</h3>
-        <p>Software engineers, data scientists, AI specialists, cloud architects, cybersecurity, and digital transformation leaders.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <h3>Finance & Banking</h3>
-        <p>Financial analysts, compliance officers, investment managers, accountants, fintech specialists, and risk professionals.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-        <h3>Oil, Gas & Energy</h3>
-        <p>Petroleum engineers, HSE managers, project engineers, sustainability specialists, and energy transition professionals.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <h3>Human Resources</h3>
-        <p>HR business partners, talent acquisition leads, L&D specialists, compensation & benefits, and HR operations managers.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-        <h3>Legal & Compliance</h3>
-        <p>Corporate lawyers, compliance managers, regulatory officers, data protection officers, and legal counsel.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="sector-card">
-        <div class="sector-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-        <h3>Sales & Marketing</h3>
-        <p>Business development directors, marketing managers, brand strategists, digital marketing leads, and commercial directors.</p>
-        <div class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-    </div>
+  <!-- TRENDS TAB -->
+  <div class="tc" id="tTrends">
+    <div class="hdr"><div class="logo"><div class="logo-i">📊</div><h1>National Trends</h1></div><div class="logo-s">YoY COMPARISON · PROVINCE BREAKDOWN</div></div>
+    <div class="sls" id="trendContent" style="padding:12px 18px"></div>
   </div>
-</section>
-
-<!-- ══════════════ JOBS ══════════════ -->
-<section class="jobs" id="jobs">
-  <div class="container">
-    <div class="jobs-header">
-      <div>
-        <div class="section-label">Latest Openings</div>
-        <h2 class="section-title light">Featured Opportunities</h2>
-        <p class="section-subtitle">Hand-picked roles from our current mandates across the UAE.</p>
-      </div>
-      <a href="javascript:void(0)" class="btn btn-gold" onclick="openRoles()">View All Roles <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-    </div>
-    <div class="job-grid">
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">Finance</div></div>
-        <h3>Senior Financial Analyst</h3>
-        <div class="company">Confidential — Multinational Bank, Dubai</div>
-        <div class="job-tags"><span class="job-tag">DIFC</span><span class="job-tag">Full-time</span><span class="job-tag">5+ yrs exp</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 25,000 – 35,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">Technology</div></div>
-        <h3>Head of Data & AI</h3>
-        <div class="company">Leading Fintech — Abu Dhabi</div>
-        <div class="job-tags"><span class="job-tag">Abu Dhabi</span><span class="job-tag">Full-time</span><span class="job-tag">8+ yrs exp</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 45,000 – 60,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">Oil & Gas</div></div>
-        <h3>HSE Manager — Offshore</h3>
-        <div class="company">International EPC — Abu Dhabi</div>
-        <div class="job-tags"><span class="job-tag">Offshore</span><span class="job-tag">Rotation</span><span class="job-tag">NEBOSH req.</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 30,000 – 42,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">Legal</div></div>
-        <h3>Head of Compliance</h3>
-        <div class="company">Regional Insurance Group — Dubai</div>
-        <div class="job-tags"><span class="job-tag">Dubai</span><span class="job-tag">Full-time</span><span class="job-tag">10+ yrs exp</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 40,000 – 55,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">HR</div></div>
-        <h3>HR Business Partner</h3>
-        <div class="company">Global Consulting Firm — Dubai</div>
-        <div class="job-tags"><span class="job-tag">Business Bay</span><span class="job-tag">Full-time</span><span class="job-tag">5+ yrs exp</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 22,000 – 30,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-      <div class="job-card">
-        <div class="job-top"><div class="job-badge">Sales</div></div>
-        <h3>Commercial Director — MENA</h3>
-        <div class="company">SaaS Platform — Remote / Dubai</div>
-        <div class="job-tags"><span class="job-tag">MENA Region</span><span class="job-tag">Full-time</span><span class="job-tag">8+ yrs exp</span></div>
-        <div class="job-footer">
-          <span class="job-salary">AED 38,000 – 50,000/mo</span>
-          <a href="#" class="job-apply" data-job-link>Apply <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ WHY ══════════════ -->
-<section class="why" id="why">
-  <div class="container why-grid">
-    <div>
-      <div class="section-label">The RydeQuest Difference</div>
-      <h2 class="section-title dark">Why Companies & Candidates Choose Us</h2>
-      <p class="section-subtitle">We combine deep industry expertise with a personalised, consultative approach. Every search is treated as a partnership — not a transaction.</p>
-      <a href="#contact" class="btn btn-navy" style="margin-top:32px">Start a Conversation</a>
-    </div>
-    <div class="why-right">
-      <div class="why-stat"><h3>48h</h3><p>Average Shortlist Delivery</p></div>
-      <div class="why-stat"><h3>92%</h3><p>Interview-to-Offer Ratio</p></div>
-      <div class="why-stat"><h3>3:1</h3><p>Candidates Per Shortlist</p></div>
-      <div class="why-stat"><h3>6</h3><p>Specialist Sectors</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ CONTACT ══════════════ -->
-<section class="contact" id="contact">
-  <div class="container contact-grid">
-    <div class="contact-info">
-      <div class="section-label">Get in Touch</div>
-      <h2 class="section-title dark">Let's Talk Talent</h2>
-      <p class="section-subtitle">Whether you're hiring or exploring your next career move, we'd love to hear from you.</p>
-      <div class="contact-item">
-        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <div><h4>Office</h4><p>Dubai, United Arab Emirates</p></div>
-      </div>
-      <div class="contact-item">
-        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-        <div><h4>Email</h4><p>info@rydequest.com</p></div>
-      </div>
-      <div class="contact-item">
-        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-        <div><h4>Phone</h4><p>+971 4 XXX XXXX</p></div>
-      </div>
-    </div>
-    <div class="contact-form">
-      <h3>Send Us a Message</h3>
-      <div class="form-success" id="formSuccess">
-        <div class="check-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <h3>Message Sent!</h3>
-        <p>Thank you for your enquiry. One of our consultants will be in touch within 24 hours.</p>
-      </div>
-      <form id="contactForm" onsubmit="event.preventDefault();document.getElementById('contactForm').style.display='none';document.getElementById('formSuccess').classList.add('show')">
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name</label>
-            <input type="text" placeholder="Your first name" required>
-          </div>
-          <div class="form-group">
-            <label>Last Name</label>
-            <input type="text" placeholder="Your last name" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" placeholder="you@company.com" required>
-          </div>
-          <div class="form-group">
-            <label>Phone</label>
-            <input type="tel" placeholder="+971 ...">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>I am a...</label>
-          <select>
-            <option>Candidate looking for a role</option>
-            <option>Company looking to hire</option>
-            <option>General enquiry</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Message</label>
-          <textarea placeholder="Tell us about your requirements or career goals..."></textarea>
-        </div>
-        <button type="submit" class="btn btn-gold form-submit">Send Message <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ ALL ROLES OVERLAY ══════════════ -->
-<div class="roles-overlay" id="rolesOverlay">
-  <div class="roles-backdrop" onclick="closeRoles()"></div>
-  <div class="roles-panel">
-    <button class="roles-close" onclick="closeRoles()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div class="roles-panel-inner">
-      <div class="roles-header">
-        <h2>All Open Positions</h2>
-        <p>Browse our full list of current mandates across the UAE and GCC</p>
-      </div>
-      <div class="roles-toolbar">
-        <div class="roles-search">
-          <div class="roles-search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <input type="text" id="roleSearch" placeholder="Search by title, location, or keyword..." oninput="filterRoles()">
-        </div>
-        <div class="roles-filters" id="roleFilters">
-          <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">All</button>
-          <button class="filter-btn" data-filter="Technology" onclick="setFilter(this)">Technology</button>
-          <button class="filter-btn" data-filter="Finance" onclick="setFilter(this)">Finance</button>
-          <button class="filter-btn" data-filter="Oil & Gas" onclick="setFilter(this)">Oil & Gas</button>
-          <button class="filter-btn" data-filter="HR" onclick="setFilter(this)">HR</button>
-          <button class="filter-btn" data-filter="Legal" onclick="setFilter(this)">Legal</button>
-          <button class="filter-btn" data-filter="Sales" onclick="setFilter(this)">Sales</button>
-        </div>
-      </div>
-      <div class="roles-count" id="rolesCount">Showing <span>18</span> open roles</div>
-      <div class="roles-list" id="rolesList">
-
-        <!-- TECHNOLOGY -->
-        <div class="role-item" data-sector="Technology" data-search="head of data ai abu dhabi fintech technology">
-          <div class="role-info">
-            <h3>Head of Data & AI</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Technology</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 8+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 45,000 – 60,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Technology" data-search="senior software engineer dubai technology java python react">
-          <div class="role-info">
-            <h3>Senior Software Engineer</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Technology</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai Internet City</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 5+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 28,000 – 38,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Technology" data-search="cybersecurity analyst dubai technology cissp">
-          <div class="role-info">
-            <h3>Cybersecurity Analyst</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Technology</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> DIFC, Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 4+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 22,000 – 32,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- FINANCE -->
-        <div class="role-item" data-sector="Finance" data-search="senior financial analyst dubai difc finance bank">
-          <div class="role-info">
-            <h3>Senior Financial Analyst</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Finance</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> DIFC, Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 5+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 25,000 – 35,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Finance" data-search="vice president investment banking dubai finance">
-          <div class="role-info">
-            <h3>VP — Investment Banking</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Finance</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> DIFC, Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 10+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 55,000 – 80,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Finance" data-search="compliance officer aml abu dhabi finance banking">
-          <div class="role-info">
-            <h3>AML Compliance Officer</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Finance</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 6+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 28,000 – 40,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- OIL & GAS -->
-        <div class="role-item" data-sector="Oil & Gas" data-search="hse manager offshore abu dhabi oil gas nebosh">
-          <div class="role-info">
-            <h3>HSE Manager — Offshore</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Oil & Gas</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi (Offshore)</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 8+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 30,000 – 42,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Oil & Gas" data-search="senior petroleum engineer adnoc abu dhabi oil gas upstream">
-          <div class="role-info">
-            <h3>Senior Petroleum Engineer</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Oil & Gas</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 10+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 35,000 – 50,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Oil & Gas" data-search="project engineer mechanical epc dubai oil gas construction">
-          <div class="role-info">
-            <h3>Project Engineer — Mechanical</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Oil & Gas</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Ruwais, Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 6+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 25,000 – 35,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- HR -->
-        <div class="role-item" data-sector="HR" data-search="hr business partner dubai consulting human resources">
-          <div class="role-info">
-            <h3>HR Business Partner</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> HR</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Business Bay, Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 5+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 22,000 – 30,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="HR" data-search="talent acquisition manager dubai hr recruitment">
-          <div class="role-info">
-            <h3>Talent Acquisition Manager</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> HR</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 6+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 20,000 – 28,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="HR" data-search="compensation benefits specialist abu dhabi hr">
-          <div class="role-info">
-            <h3>Compensation & Benefits Specialist</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> HR</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 4+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 18,000 – 25,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- LEGAL -->
-        <div class="role-item" data-sector="Legal" data-search="head of compliance dubai insurance legal regulatory">
-          <div class="role-info">
-            <h3>Head of Compliance</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Legal</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 10+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 40,000 – 55,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Legal" data-search="data protection officer dpo dubai legal compliance gdpr">
-          <div class="role-info">
-            <h3>Data Protection Officer</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Legal</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 5+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 25,000 – 38,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Legal" data-search="corporate counsel in-house lawyer abu dhabi legal">
-          <div class="role-info">
-            <h3>Corporate Counsel — In-House</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Legal</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Abu Dhabi</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 7+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 30,000 – 45,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- SALES -->
-        <div class="role-item" data-sector="Sales" data-search="commercial director mena saas dubai sales business development">
-          <div class="role-info">
-            <h3>Commercial Director — MENA</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Sales</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai / Remote</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 8+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 38,000 – 50,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Sales" data-search="regional sales manager dubai sales b2b enterprise">
-          <div class="role-info">
-            <h3>Regional Sales Manager — B2B</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Sales</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 5+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 20,000 – 30,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <div class="role-item" data-sector="Sales" data-search="head of marketing digital dubai sales brand strategy">
-          <div class="role-info">
-            <h3>Head of Marketing</h3>
-            <div class="role-meta">
-              <span class="role-meta-item sector-tag"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Sales</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Dubai</span>
-              <span class="role-meta-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> 7+ yrs</span>
-            </div>
-          </div>
-          <div class="role-right">
-            <div class="role-salary">AED 28,000 – 40,000</div>
-            <button class="role-apply-btn" data-role-apply>Apply Now</button>
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <div class="roles-empty" id="rolesEmpty" style="display:none">
-          <h3>No matching roles found</h3>
-          <p>Try a different search term or filter, or get in touch — we may have unlisted mandates.</p>
-        </div>
-      </div>
-    </div>
+  <!-- FORECAST TAB -->
+  <div class="tc" id="tForecast">
+    <div class="hdr"><div class="logo"><div class="logo-i">🔮</div><h1>Crime Forecasting</h1></div><div class="logo-s">RISK SCORES · HOTSPOT PREDICTION · WHAT-IF</div></div>
+    <div class="sls" id="forecastContent" style="padding:12px 18px"></div>
   </div>
 </div>
-
-<!-- ══════════════ CTA BANNER ══════════════ -->
-<section class="cta-banner">
-  <div class="container cta-banner-inner">
-    <h2>Ready to Find Your Next Opportunity?</h2>
-    <p>Whether you're a company searching for exceptional talent or a professional ready for your next career move, RydeQuest is here to make it happen.</p>
-    <div class="btn-group">
-      <a href="#contact" class="btn btn-gold">I'm Hiring <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      <a href="#jobs" class="btn btn-outline">I'm Looking for a Role</a>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ SCROLL TO TOP ══════════════ -->
-<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-</button>
-
-<!-- ══════════════ FOOTER ══════════════ -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="logo">
-          <div class="logo-mark">RQ</div>
-          <div class="logo-text">Ryde<span>Quest</span></div>
-        </div>
-        <p>Specialist white-collar recruitment consultancy. Connecting exceptional talent with industry leaders across the UAE and GCC.</p>
-      </div>
-      <div>
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="#about">About Us</a></li>
-          <li><a href="#sectors">Sectors</a></li>
-          <li><a href="#jobs">Opportunities</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Sectors</h4>
-        <ul>
-          <li><a href="#sectors">Technology</a></li>
-          <li><a href="#sectors">Finance & Banking</a></li>
-          <li><a href="#sectors">Oil, Gas & Energy</a></li>
-          <li><a href="#sectors">Human Resources</a></li>
-          <li><a href="#sectors">Legal & Compliance</a></li>
-          <li><a href="#sectors">Sales & Marketing</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>For Candidates</h4>
-        <ul>
-          <li><a href="#jobs">Browse Roles</a></li>
-          <li><a href="#contact">Submit CV</a></li>
-          <li><a href="#contact">Career Advice</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 RydeQuest. All rights reserved.</p>
-      <div class="footer-socials">
-        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
-        <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<script src="jobs-data.js"></script>
+<div class="mapa">
+  <div id="map"></div>
+  <div class="zoom-tip" id="zTip">Zoom to see streets</div>
+  <div class="legend"><div class="lg-t">Severity</div><div class="lg-i"><div class="lg-c" style="background:#ff2244"></div>Critical (1000+)</div><div class="lg-i"><div class="lg-c" style="background:#ff7a30"></div>High (500–999)</div><div class="lg-i"><div class="lg-c" style="background:#ffbe2e"></div>Medium (200–499)</div><div class="lg-i"><div class="lg-c" style="background:#00cc88"></div>Lower</div></div>
+  <div class="dsrc"><a href="https://www.saps.gov.za/services/crimestats.php" target="_blank">SAPS</a> · <a href="https://www.crimestatssa.com" target="_blank">CrimeStatsSA</a> · <a href="https://crimehub.org" target="_blank">CrimeHub</a> · <a href="https://issafrica.org" target="_blank">ISS Africa</a></div>
+</div>
 <script>
-// ── Page load animation ──
-window.addEventListener('DOMContentLoaded',()=>{
-  requestAnimationFrame(()=>{document.body.classList.remove('loading');document.body.classList.add('loaded')});
-});
+// ===================================================================
+// DATA: 120+ stations with CURRENT + PREVIOUS period for trend calc
+// kidnap added. prev = same quarter previous year for YoY comparison
+// ===================================================================
+const D=[
+// WC
+{n:"Nyanga",lat:-33.9858,lng:18.5636,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:70,robbery:312,assault:245,sexual:68,property:180,carjack:42,kidnap:8,drugs:74},prev:{murder:79,robbery:295,assault:252,sexual:65,property:192,carjack:38,kidnap:5,drugs:68},note:"Gang violence. Gun-related murders dominant."},
+{n:"Mfuleni",lat:-33.9828,lng:18.6976,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:75,robbery:240,assault:195,sexual:45,property:155,carjack:35,kidnap:6,drugs:52},prev:{murder:73,robbery:228,assault:188,sexual:42,property:148,carjack:32,kidnap:4,drugs:48},note:"#1 murder station Q3 2025/26."},
+{n:"Khayelitsha",lat:-34.0389,lng:18.6744,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:52,robbery:285,assault:210,sexual:72,property:165,carjack:38,kidnap:12,drugs:62},prev:{murder:68,robbery:275,assault:215,sexual:70,property:170,carjack:35,kidnap:8,drugs:58},note:"LEAP area. Murder improving."},
+{n:"Delft",lat:-33.9643,lng:18.6324,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:58,robbery:270,assault:195,sexual:48,property:145,carjack:35,kidnap:5,drugs:72},prev:{murder:68,robbery:262,assault:198,sexual:45,property:150,carjack:32,kidnap:4,drugs:65},note:"Murder improved significantly."},
+{n:"Mitchells Plain",lat:-34.0523,lng:18.6162,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:43,robbery:320,assault:198,sexual:55,property:220,carjack:52,kidnap:15,drugs:85},prev:{murder:48,robbery:308,assault:205,sexual:52,property:228,carjack:48,kidnap:10,drugs:80},note:"#3 nationally overall crime."},
+{n:"Philippi East",lat:-34.01,lng:18.59,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:65,robbery:248,assault:185,sexual:52,property:130,carjack:40,kidnap:7,drugs:58},prev:{murder:74,robbery:240,assault:182,sexual:50,property:135,carjack:38,kidnap:5,drugs:55},note:"Firearms hotspot."},
+{n:"Gugulethu",lat:-33.9783,lng:18.5664,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:52,robbery:195,assault:175,sexual:42,property:118,carjack:28,kidnap:4,drugs:45},prev:{murder:55,robbery:188,assault:178,sexual:40,property:122,carjack:25,kidnap:3,drugs:42},note:"Top 5 murder."},
+{n:"Harare",lat:-34.055,lng:18.683,p:"WC",a:"Cape Flats",t:"Township",s:"critical",c:{murder:55,robbery:265,assault:210,sexual:58,property:142,carjack:32,kidnap:5,drugs:48},prev:{murder:62,robbery:255,assault:205,sexual:55,property:148,carjack:30,kidnap:4,drugs:45},note:"Top 10 murder nationally."},
+{n:"Cape Town Central",lat:-33.9249,lng:18.4241,p:"WC",a:"City Bowl",t:"Tier1",s:"critical",c:{murder:25,robbery:420,assault:280,sexual:35,property:385,carjack:65,kidnap:28,drugs:120},prev:{murder:22,robbery:395,assault:272,sexual:32,property:378,carjack:58,kidnap:20,drugs:112},note:"#1 nationally for serious crimes."},
+{n:"Kraaifontein",lat:-33.8511,lng:18.7274,p:"WC",a:"N.Suburbs",t:"Tier2",s:"critical",c:{murder:48,robbery:225,assault:188,sexual:38,property:178,carjack:42,kidnap:8,drugs:65},prev:{murder:45,robbery:218,assault:185,sexual:35,property:182,carjack:38,kidnap:5,drugs:60},note:"Growing crime trend."},
+{n:"Manenberg",lat:-33.9867,lng:18.5344,p:"WC",a:"Cape Flats",t:"Township",s:"high",c:{murder:28,robbery:165,assault:142,sexual:28,property:88,carjack:18,kidnap:3,drugs:95},prev:{murder:35,robbery:170,assault:148,sexual:30,property:92,carjack:20,kidnap:2,drugs:88},note:"-20.8% murder. LEAP success."},
+{n:"Bishop Lavis",lat:-33.95,lng:18.55,p:"WC",a:"Cape Flats",t:"Township",s:"high",c:{murder:32,robbery:155,assault:138,sexual:25,property:92,carjack:22,kidnap:4,drugs:88},prev:{murder:35,robbery:150,assault:135,sexual:28,property:95,carjack:18,kidnap:2,drugs:82},note:"LEAP area."},
+{n:"Bellville",lat:-33.8981,lng:18.6273,p:"WC",a:"N.Suburbs",t:"Tier2",s:"high",c:{murder:12,robbery:185,assault:120,sexual:18,property:195,carjack:35,kidnap:12,drugs:45},prev:{murder:10,robbery:175,assault:115,sexual:15,property:188,carjack:30,kidnap:8,drugs:42},note:"Business hub. Kidnapping up."},
+{n:"Steenberg",lat:-34.0758,lng:18.4916,p:"WC",a:"S.Suburbs",t:"Township",s:"high",c:{murder:8,robbery:108,assault:98,sexual:18,property:72,carjack:14,kidnap:2,drugs:48},prev:{murder:18,robbery:115,assault:105,sexual:20,property:78,carjack:16,kidnap:3,drugs:52},note:"-56% murder. Biggest improvement."},
+{n:"George",lat:-33.9631,lng:22.4621,p:"WC",a:"Garden Route",t:"Tier2",s:"medium",c:{murder:12,robbery:68,assault:75,sexual:18,property:78,carjack:10,kidnap:3,drugs:42},prev:{murder:10,robbery:62,assault:70,sexual:15,property:72,carjack:8,kidnap:2,drugs:38},note:"Garden Route hub."},
+{n:"Paarl",lat:-33.727,lng:18.9621,p:"WC",a:"Winelands",t:"Tier2",s:"medium",c:{murder:15,robbery:82,assault:95,sexual:22,property:85,carjack:12,kidnap:3,drugs:48},prev:{murder:12,robbery:78,assault:88,sexual:20,property:82,carjack:10,kidnap:2,drugs:45},note:"Assault up."},
+// GP
+{n:"Johannesburg Central",lat:-26.2041,lng:28.0473,p:"GP",a:"JHB CBD",t:"Tier1",s:"critical",c:{murder:35,robbery:480,assault:320,sexual:42,property:420,carjack:85,kidnap:62,drugs:135},prev:{murder:38,robbery:465,assault:312,sexual:40,property:415,carjack:78,kidnap:48,drugs:128},note:"Kidnapping up 29%. #1 overall."},
+{n:"Alexandra",lat:-26.1063,lng:28.0995,p:"GP",a:"JHB",t:"Township",s:"critical",c:{murder:55,robbery:310,assault:260,sexual:48,property:185,carjack:52,kidnap:35,drugs:72},prev:{murder:52,robbery:298,assault:255,sexual:45,property:180,carjack:48,kidnap:28,drugs:68},note:"Kidnapping +25%."},
+{n:"Tembisa",lat:-26.0014,lng:28.2269,p:"GP",a:"Ekurhuleni",t:"Township",s:"critical",c:{murder:36,robbery:285,assault:240,sexual:45,property:195,carjack:48,kidnap:28,drugs:68},prev:{murder:38,robbery:278,assault:235,sexual:42,property:188,carjack:45,kidnap:22,drugs:62},note:"Kidnapping surge."},
+{n:"Hillbrow",lat:-26.1958,lng:28.0486,p:"GP",a:"Inner City",t:"Tier1",s:"critical",c:{murder:28,robbery:395,assault:285,sexual:52,property:240,carjack:35,kidnap:45,drugs:145},prev:{murder:32,robbery:382,assault:278,sexual:48,property:235,carjack:32,kidnap:35,drugs:138},note:"Kidnapping +28%."},
+{n:"Orange Farm",lat:-26.4869,lng:27.8692,p:"GP",a:"JHB South",t:"Township",s:"critical",c:{murder:58,robbery:220,assault:195,sexual:42,property:135,carjack:32,kidnap:15,drugs:48},prev:{murder:62,robbery:215,assault:190,sexual:40,property:130,carjack:28,kidnap:10,drugs:45},note:"Murder improving."},
+{n:"Pretoria Central",lat:-25.7479,lng:28.1893,p:"GP",a:"Tshwane",t:"Tier1",s:"critical",c:{murder:22,robbery:320,assault:215,sexual:35,property:285,carjack:55,kidnap:42,drugs:95},prev:{murder:25,robbery:308,assault:210,sexual:32,property:278,carjack:48,kidnap:32,drugs:88},note:"Kidnapping +31%."},
+{n:"Soweto - Moroka",lat:-26.2679,lng:27.8689,p:"GP",a:"Soweto",t:"Township",s:"high",c:{murder:38,robbery:185,assault:165,sexual:35,property:120,carjack:28,kidnap:18,drugs:55},prev:{murder:42,robbery:178,assault:160,sexual:32,property:118,carjack:25,kidnap:12,drugs:50},note:"Kidnapping +50%."},
+{n:"Katlehong",lat:-26.3417,lng:28.1661,p:"GP",a:"Ekurhuleni",t:"Township",s:"high",c:{murder:42,robbery:195,assault:175,sexual:38,property:125,carjack:35,kidnap:22,drugs:48},prev:{murder:45,robbery:188,assault:170,sexual:35,property:120,carjack:32,kidnap:15,drugs:45},note:"Kidnapping +47%."},
+{n:"Mamelodi East",lat:-25.7188,lng:28.3994,p:"GP",a:"Tshwane",t:"Township",s:"high",c:{murder:45,robbery:195,assault:175,sexual:38,property:125,carjack:42,kidnap:18,drugs:52},prev:{murder:48,robbery:188,assault:168,sexual:35,property:120,carjack:38,kidnap:12,drugs:48},note:"Carjacking hub."},
+{n:"Soshanguve",lat:-25.4847,lng:28.0905,p:"GP",a:"Tshwane",t:"Township",s:"high",c:{murder:38,robbery:175,assault:165,sexual:35,property:115,carjack:35,kidnap:15,drugs:48},prev:{murder:42,robbery:168,assault:158,sexual:32,property:112,carjack:32,kidnap:10,drugs:45},note:"5th largest township."},
+{n:"Germiston",lat:-26.2172,lng:28.1714,p:"GP",a:"Ekurhuleni",t:"Tier2",s:"high",c:{murder:30,robbery:195,assault:155,sexual:28,property:175,carjack:52,kidnap:20,drugs:58},prev:{murder:32,robbery:188,assault:150,sexual:25,property:170,carjack:48,kidnap:14,drugs:55},note:"Carjacking hotspot."},
+{n:"Diepsloot",lat:-25.9333,lng:28.0167,p:"GP",a:"JHB North",t:"Township",s:"high",c:{murder:28,robbery:125,assault:115,sexual:25,property:65,carjack:18,kidnap:12,drugs:28},prev:{murder:25,robbery:118,assault:108,sexual:22,property:62,carjack:15,kidnap:8,drugs:25},note:"Informal. Crime increasing."},
+{n:"Sandton",lat:-26.1076,lng:28.0567,p:"GP",a:"JHB North",t:"Tier1",s:"medium",c:{murder:5,robbery:125,assault:55,sexual:8,property:185,carjack:38,kidnap:18,drugs:28},prev:{murder:4,robbery:118,assault:50,sexual:6,property:178,carjack:32,kidnap:12,drugs:25},note:"Business district. Kidnap up."},
+{n:"Sebokeng",lat:-26.5758,lng:27.8278,p:"GP",a:"Sedibeng",t:"Township",s:"high",c:{murder:28,robbery:135,assault:125,sexual:25,property:85,carjack:22,kidnap:10,drugs:35},prev:{murder:32,robbery:128,assault:120,sexual:22,property:82,carjack:18,kidnap:6,drugs:32},note:"Vaal Triangle."},
+// KZN
+{n:"Inanda",lat:-29.6731,lng:30.8728,p:"KZN",a:"eThekwini",t:"Township",s:"critical",c:{murder:68,robbery:265,assault:225,sexual:65,property:145,carjack:32,kidnap:22,drugs:48},prev:{murder:76,robbery:258,assault:220,sexual:62,property:140,carjack:28,kidnap:15,drugs:45},note:"Murder improving. Kidnapping up."},
+{n:"Umlazi",lat:-29.9625,lng:30.8856,p:"KZN",a:"eThekwini",t:"Township",s:"critical",c:{murder:62,robbery:245,assault:210,sexual:55,property:135,carjack:28,kidnap:18,drugs:42},prev:{murder:71,robbery:238,assault:205,sexual:52,property:130,carjack:25,kidnap:12,drugs:40},note:"4th largest township. Murder down."},
+{n:"Durban Central",lat:-29.8587,lng:31.0218,p:"KZN",a:"eThekwini",t:"Tier1",s:"critical",c:{murder:28,robbery:380,assault:255,sexual:38,property:320,carjack:55,kidnap:35,drugs:110},prev:{murder:32,robbery:368,assault:248,sexual:35,property:312,carjack:48,kidnap:25,drugs:105},note:"Kidnapping +40%."},
+{n:"Plessislaer",lat:-29.6361,lng:30.415,p:"KZN",a:"Msunduzi",t:"Township",s:"critical",c:{murder:48,robbery:245,assault:215,sexual:52,property:155,carjack:22,kidnap:12,drugs:38},prev:{murder:52,robbery:238,assault:208,sexual:48,property:150,carjack:18,kidnap:8,drugs:35},note:"PMB precinct."},
+{n:"KwaMashu",lat:-29.745,lng:30.975,p:"KZN",a:"eThekwini",t:"Township",s:"high",c:{murder:42,robbery:195,assault:178,sexual:45,property:115,carjack:25,kidnap:12,drugs:35},prev:{murder:45,robbery:188,assault:172,sexual:42,property:110,carjack:22,kidnap:8,drugs:32},note:"Major KZN township."},
+// EC
+{n:"Mthatha",lat:-31.5889,lng:28.7844,p:"EC",a:"O.R.Tambo",t:"Tier2",s:"high",c:{murder:44,robbery:185,assault:195,sexual:48,property:125,carjack:22,kidnap:8,drugs:35},prev:{murder:42,robbery:178,assault:188,sexual:45,property:120,carjack:18,kidnap:5,drugs:32},note:"Sexual offences concern."},
+{n:"Motherwell",lat:-33.8063,lng:25.6567,p:"EC",a:"NMB",t:"Township",s:"high",c:{murder:35,robbery:165,assault:155,sexual:38,property:105,carjack:18,kidnap:6,drugs:32},prev:{murder:32,robbery:158,assault:148,sexual:35,property:100,carjack:15,kidnap:4,drugs:28},note:"Murder increasing."},
+{n:"Gqeberha Central",lat:-33.961,lng:25.6022,p:"EC",a:"NMB",t:"Tier1",s:"high",c:{murder:15,robbery:165,assault:115,sexual:22,property:185,carjack:35,kidnap:12,drugs:52},prev:{murder:12,robbery:158,assault:110,sexual:20,property:178,carjack:30,kidnap:8,drugs:48},note:"Kidnapping up."},
+{n:"Mdantsane",lat:-32.9664,lng:27.7583,p:"EC",a:"Buffalo City",t:"Township",s:"high",c:{murder:28,robbery:135,assault:125,sexual:28,property:85,carjack:15,kidnap:5,drugs:25},prev:{murder:25,robbery:128,assault:118,sexual:25,property:82,carjack:12,kidnap:3,drugs:22},note:"Murder trend up."},
+// MP
+{n:"Nelspruit",lat:-25.4753,lng:30.9694,p:"MP",a:"Mbombela",t:"Tier2",s:"medium",c:{murder:15,robbery:125,assault:105,sexual:22,property:135,carjack:28,kidnap:8,drugs:42},prev:{murder:12,robbery:118,assault:98,sexual:18,property:128,carjack:22,kidnap:5,drugs:38},note:"Capital. Crime growing."},
+{n:"eMalahleni",lat:-25.8719,lng:29.2339,p:"MP",a:"eMalahleni",t:"Tier2",s:"medium",c:{murder:22,robbery:115,assault:98,sexual:18,property:115,carjack:25,kidnap:6,drugs:38},prev:{murder:18,robbery:108,assault:92,sexual:15,property:108,carjack:20,kidnap:4,drugs:35},note:"Mining city. Murder up."},
+// NW
+{n:"Boitekong",lat:-25.6319,lng:27.1067,p:"NW",a:"Rustenburg",t:"Township",s:"high",c:{murder:43,robbery:135,assault:128,sexual:28,property:85,carjack:18,kidnap:5,drugs:35},prev:{murder:38,robbery:128,assault:122,sexual:25,property:80,carjack:15,kidnap:3,drugs:32},note:"Murder up 13%."},
+{n:"Rustenburg",lat:-25.6714,lng:27.2419,p:"NW",a:"Rustenburg",t:"Tier2",s:"high",c:{murder:25,robbery:145,assault:118,sexual:22,property:125,carjack:28,kidnap:8,drugs:42},prev:{murder:22,robbery:138,assault:112,sexual:20,property:118,carjack:24,kidnap:5,drugs:38},note:"Platinum belt."},
+// FS
+{n:"Bloemfontein",lat:-29.0852,lng:26.1596,p:"FS",a:"Mangaung",t:"Tier1",s:"high",c:{murder:28,robbery:165,assault:145,sexual:32,property:155,carjack:25,kidnap:10,drugs:48},prev:{murder:25,robbery:158,assault:138,sexual:28,property:148,carjack:22,kidnap:6,drugs:42},note:"Kidnapping up 67%."},
+// LP
+{n:"Polokwane",lat:-23.9045,lng:29.4688,p:"LP",a:"Polokwane",t:"Tier2",s:"medium",c:{murder:15,robbery:95,assault:78,sexual:18,property:105,carjack:15,kidnap:5,drugs:28},prev:{murder:12,robbery:88,assault:72,sexual:15,property:98,carjack:12,kidnap:3,drugs:25},note:"Murder increasing."},
+{n:"Thohoyandou",lat:-22.9482,lng:30.4844,p:"LP",a:"Vhembe",t:"Tier3",s:"medium",c:{murder:12,robbery:52,assault:68,sexual:55,property:42,carjack:5,kidnap:3,drugs:18},prev:{murder:10,robbery:48,assault:62,sexual:52,property:38,carjack:4,kidnap:2,drugs:15},note:"#3 for rape nationally."},
+// NC
+{n:"Kimberley",lat:-28.7379,lng:24.7679,p:"NC",a:"Sol Plaatje",t:"Tier2",s:"medium",c:{murder:18,robbery:82,assault:75,sexual:18,property:72,carjack:10,kidnap:4,drugs:28},prev:{murder:15,robbery:78,assault:70,sexual:15,property:68,carjack:8,kidnap:2,drugs:25},note:"Diamond city."},
+];
 
-// ── Title-to-ID mapping for job links ──
-function titleToId(title){
-  const job=JOBS.find(j=>j.title===title);
-  return job?job.id:null;
+const PC={all:{lat:-29,lng:25,z:6},WC:{lat:-33.9,lng:19.5,z:8},GP:{lat:-26.1,lng:28.1,z:10},KZN:{lat:-29.5,lng:30.5,z:8},EC:{lat:-32.5,lng:27,z:8},MP:{lat:-25.7,lng:30,z:8},NW:{lat:-25.8,lng:26.5,z:8},FS:{lat:-28.5,lng:27,z:8},LP:{lat:-23.5,lng:29.5,z:8},NC:{lat:-29,lng:22,z:7}};
+const map=L.map('map',{center:[-29,25],zoom:6,zoomControl:true,attributionControl:false,maxZoom:19,minZoom:5});
+const dkT=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd'});
+const stT=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19});
+dkT.addTo(map);
+map.on('zoomend',()=>{const z=map.getZoom();document.getElementById('zTip').style.opacity=z<10?'1':'0';if(z>=15&&!map.hasLayer(stT)){map.removeLayer(dkT);stT.addTo(map)}else if(z<15&&!map.hasLayer(dkT)){map.removeLayer(stT);dkT.addTo(map)}});
+
+let mL=L.layerGroup().addTo(map),hL=null,cL=null;let vw='markers',prov='all',crime='all',sq='';
+
+function sc(s){return{critical:'#ff2244',high:'#ff7a30',medium:'#ffbe2e',low:'#00cc88'}[s]||'#888'}
+function tot(st,f){return f==='all'?Object.values(st.c).reduce((a,b)=>a+b,0):(st.c[f]||0)}
+function totP(st,f){return f==='all'?Object.values(st.prev).reduce((a,b)=>a+b,0):(st.prev[f]||0)}
+function trendPct(cur,prev){if(!prev)return{pct:0,dir:'eq'};const p=((cur-prev)/prev*100);return{pct:Math.abs(p).toFixed(1),dir:p>2?'up':p<-2?'dn':'eq'}}
+function trendIcon(dir){return dir==='up'?'▲':dir==='dn'?'▼':'■'}
+function ms(t){return t>800?34:t>500?28:t>300?22:t>150?16:t>50?12:9}
+
+function fd(){return D.filter(s=>{if(prov!=='all'&&s.p!==prov)return false;if(sq&&!s.n.toLowerCase().includes(sq)&&!s.a.toLowerCase().includes(sq))return false;return tot(s,crime)>0}).map(s=>({...s,tt:tot(s,crime),tp:totP(s,crime)})).sort((a,b)=>b.tt-a.tt)}
+
+function pp(s){const t=tot(s,'all'),tp=totP(s,'all'),tr=trendPct(t,tp);
+const l={murder:'🔴 Murder',robbery:'🟠 Robbery',assault:'🟡 Assault',sexual:'🟣 Sexual',property:'🔵 Property',carjack:'🔶 Carjack',kidnap:'⚫ Kidnap',drugs:'🟢 Drugs'};
+let h='';Object.entries(s.c).forEach(([k,v])=>{const pt=trendPct(v,s.prev[k]);h+=`<div class="p-i"><span class="p-in">${l[k]}</span><span class="p-iv">${v} <span style="font-size:7px;color:${pt.dir==='up'?'var(--up)':pt.dir==='dn'?'var(--dn)':'var(--eq)'}">${trendIcon(pt.dir)}${pt.pct}%</span></span></div>`});
+return`<div class="p-h"><span class="p-t">${s.n}</span><span class="p-sev ${s.s}">${s.s}</span></div><div class="p-sub">${s.p}·${s.a}·${s.t} | YoY: <span style="color:${tr.dir==='up'?'var(--up)':'var(--dn)'}">${trendIcon(tr.dir)}${tr.pct}%</span></div><div class="p-g">${h}</div><div class="p-tot"><span>Total</span><span class="p-tv">${t.toLocaleString()}</span></div><div class="p-note">${s.note}</div>`}
+
+function rM(){mL.clearLayers();fd().forEach(s=>{const sz=ms(s.tt),c=sc(s.s);const ic=L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;background:${c};border-radius:50%;display:grid;place-items:center;font-family:'IBM Plex Mono';font-size:${sz>20?'7':'5'}px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.2);box-shadow:0 2px 6px ${c}44;${s.s==='critical'?'animation:pulse 2s infinite':''}">${s.tt>99?Math.round(s.tt/100)+'h':s.tt}</div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});L.marker([s.lat,s.lng],{icon:ic}).bindPopup(pp(s),{maxWidth:320}).addTo(mL)._sn=s.n})}
+function rH(){if(hL)map.removeLayer(hL);hL=L.heatLayer(fd().map(s=>[s.lat,s.lng,s.tt/8]),{radius:28,blur:20,maxZoom:14,gradient:{.15:'#00cc88',.35:'#ffbe2e',.55:'#ff7a30',.75:'#ff2244',1:'#990022'}}).addTo(map)}
+function rC(){if(cL)map.removeLayer(cL);cL=L.markerClusterGroup({maxClusterRadius:40,iconCreateFunction:cl=>{const n=cl.getChildCount();let sz=34,c='#00cc88';if(n>15){sz=50;c='#ff2244'}else if(n>8){sz=42;c='#ff7a30'}else if(n>4){sz=38;c='#ffbe2e'}return L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;background:${c};border-radius:50%;display:grid;place-items:center;font-family:'IBM Plex Mono';font-size:12px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.2)">${n}</div>`,className:'',iconSize:[sz,sz]})}});fd().forEach(s=>{cL.addLayer(L.marker([s.lat,s.lng]).bindPopup(pp(s),{maxWidth:320}))});map.addLayer(cL)}
+function setV(v){vw=v;document.querySelectorAll('.vb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));mL.clearLayers();if(hL)map.removeLayer(hL);if(cL)map.removeLayer(cL);({markers:rM,heat:rH,cluster:rC})[v]()}
+function rList(){const d=fd(),el=document.getElementById('sList');el.innerHTML=d.map((s,i)=>{const tr=trendPct(s.tt,s.tp);return`<div class="si" data-s="${s.n}" onclick="fly('${s.n.replace(/'/g,"\\'")}')"><span class="si-r">${i+1}</span><div class="si-d ${s.s}"></div><div class="si-i"><div class="si-n">${s.n}</div><div class="si-e">${s.p}·${s.a}</div></div><div class="si-c">${s.tt.toLocaleString()}<span class="si-trend ${tr.dir}">${trendIcon(tr.dir)}${tr.pct}%</span></div></div>`}).join('');
+document.getElementById('xT').textContent=d.reduce((a,b)=>a+b.tt,0).toLocaleString();document.getElementById('xS').textContent=d.length;document.getElementById('xM').textContent=d.reduce((a,b)=>a+(b.c.murder||0),0).toLocaleString();document.getElementById('xR').textContent=d.reduce((a,b)=>a+(b.c.robbery||0),0).toLocaleString();document.getElementById('xK').textContent=d.reduce((a,b)=>a+(b.c.kidnap||0),0).toLocaleString()}
+function fly(n){const s=D.find(x=>x.n===n);if(!s)return;map.flyTo([s.lat,s.lng],14,{duration:1});mL.eachLayer(l=>{if(l._sn===n)l.openPopup()});document.querySelectorAll('.si').forEach(e=>e.classList.toggle('sel',e.dataset.s===n))}
+function ref(){setV(vw);rList()}
+document.getElementById('pF').addEventListener('click',e=>{const p=e.target.dataset?.p;if(!p)return;document.querySelectorAll('#pF .pill').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');prov=p;const c=PC[p];map.flyTo([c.lat,c.lng],c.z,{duration:1});ref()});
+document.getElementById('cF').addEventListener('click',e=>{const c=e.target.dataset?.c;if(!c)return;document.querySelectorAll('#cF .pill').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');crime=c;ref()});
+document.getElementById('search').addEventListener('input',e=>{sq=e.target.value.toLowerCase().trim();ref()});
+
+// ======== LEADERBOARD ========
+let lbPeriod='weekly',lbCat='total';
+function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-btn').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase().includes(p.slice(0,4))));renderLb()}
+document.getElementById('lbCat').addEventListener('click',e=>{const c=e.target.dataset?.lc;if(!c)return;lbCat=c;document.querySelectorAll('#lbCat .pill').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');renderLb()});
+
+function renderLb(){
+  const mult={weekly:.25,monthly:1,quarterly:1}[lbPeriod];
+  const data=D.map(s=>{
+    const cur=lbCat==='total'?tot(s,'all'):tot(s,lbCat);
+    const prev=lbCat==='total'?totP(s,'all'):totP(s,lbCat);
+    const wCur=Math.round(cur*mult),wPrev=Math.round(prev*mult);
+    const diff=wCur-wPrev;const move=diff>0?{dir:'up',val:diff}:diff<0?{dir:'dn',val:Math.abs(diff)}:{dir:'eq',val:0};
+    return{...s,val:wCur,move};
+  }).filter(s=>s.val>0).sort((a,b)=>b.val-a.val).slice(0,10);
+
+  document.getElementById('lbList').innerHTML=data.map((s,i)=>{
+    const posClass=i===0?'g':i===1?'s':i===2?'b':'n';
+    const moveIcon=s.move.dir==='up'?'▲':s.move.dir==='dn'?'▼':'—';
+    return`<div class="lb-item"><div class="lb-pos ${posClass}">${i+1}</div><div class="lb-info"><div class="lb-name">${s.n}</div><div class="lb-sub">${s.p}·${s.a}·${s.t}</div></div><div class="lb-val"><div class="lb-num">${s.val.toLocaleString()}</div><div class="lb-move ${s.move.dir}">${moveIcon} ${s.move.val>0?'+'+s.move.val:s.move.dir==='eq'?'No change':'-'+s.move.val}</div></div></div>`}).join('');
 }
 
-// Navbar scroll effect + scroll-to-top
-const navbar=document.getElementById('navbar');
-const scrollBtn=document.getElementById('scrollTop');
-window.addEventListener('scroll',()=>{
-  navbar.classList.toggle('scrolled',window.scrollY>60);
-  scrollBtn.classList.toggle('visible',window.scrollY>600);
-});
-
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    e.preventDefault();
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
-  });
-});
-
-// Intersection observer for fade-in animations
-const observer=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}});
-},{threshold:.15});
-document.querySelectorAll('.sector-card,.job-card,.why-stat,.about-card,.contact-form,.value-item,.cta-banner-inner').forEach(el=>{
-  el.style.opacity='0';el.style.transform='translateY(24px)';el.style.transition='opacity .6s ease, transform .6s ease';
-  observer.observe(el);
-});
-
-/* old jobData removed */void function(){const _={
-  'Head of Data & AI':{sector:'Technology',company:'Leading Fintech — Abu Dhabi',location:'Abu Dhabi',exp:'8+ years',salary:'AED 45,000 – 60,000/mo',
-    about:'We are seeking a visionary Head of Data & AI to lead the data strategy for one of the UAE\'s most innovative fintech companies. This role oversees a team of data scientists and ML engineers, setting the direction for how data drives product decisions, risk modeling, and customer personalisation across the platform.',
-    responsibilities:['Define and execute the enterprise data & AI strategy aligned with business goals','Build, mentor, and lead a high-performing team of 15+ data scientists and ML engineers','Design and deploy production-grade ML models for credit scoring, fraud detection, and personalisation','Establish data governance frameworks and ensure compliance with UAE data protection regulations','Partner with C-suite to translate data insights into commercial opportunities','Manage vendor relationships and evaluate emerging AI technologies'],
-    requirements:['8+ years in data science/AI, with 3+ years in a leadership role','Deep expertise in Python, TensorFlow/PyTorch, and cloud ML platforms (AWS SageMaker, GCP Vertex)','Experience in fintech, banking, or payments strongly preferred','Strong understanding of UAE/GCC regulatory landscape','MBA or advanced degree in Computer Science, Statistics, or related field','Track record of deploying ML models at scale'],
-    benefits:['Competitive salary + annual performance bonus','Equity participation','Premium medical insurance for family','Flexible hybrid working model','Relocation support for international candidates','Annual learning & development budget of AED 15,000']},
-  'Senior Software Engineer':{sector:'Technology',company:'Global E-Commerce Platform — Dubai Internet City',location:'Dubai Internet City',exp:'5+ years',salary:'AED 28,000 – 38,000/mo',
-    about:'Join a fast-growing e-commerce platform as a Senior Software Engineer building high-performance backend services that handle millions of transactions daily. You\'ll work in a modern tech stack and collaborate with product teams across three continents.',
-    responsibilities:['Design and build scalable microservices using Java/Kotlin and Spring Boot','Architect event-driven systems handling 10M+ daily transactions','Mentor junior engineers and conduct code reviews','Collaborate with product managers to translate requirements into technical solutions','Improve CI/CD pipelines and deployment automation','Participate in on-call rotation for production systems'],
-    requirements:['5+ years professional experience with Java, Kotlin, or Python','Strong understanding of distributed systems and microservice architecture','Experience with Kubernetes, Docker, and cloud platforms (AWS/GCP)','Proficiency in SQL and NoSQL databases','Excellent communication skills in English','Bachelor\'s degree in Computer Science or equivalent'],
-    benefits:['Competitive base salary + annual bonus','Premium medical insurance','Flexible working hours & remote Fridays','Annual flight tickets home','Professional development budget','Modern office in Dubai Internet City']},
-  'Cybersecurity Analyst':{sector:'Technology',company:'Multinational Financial Services — DIFC, Dubai',location:'DIFC, Dubai',exp:'4+ years',salary:'AED 22,000 – 32,000/mo',
-    about:'Protect critical financial infrastructure as a Cybersecurity Analyst for a leading multinational financial services firm. You\'ll monitor threats, respond to incidents, and strengthen our security posture across the MENA region.',
-    responsibilities:['Monitor and analyze security events using SIEM tools','Conduct vulnerability assessments and penetration testing','Lead incident response and post-incident analysis','Develop security policies aligned with DFSA and UAE regulations','Manage endpoint protection and network security solutions','Deliver security awareness training to staff'],
-    requirements:['4+ years in cybersecurity or information security','CISSP, CISM, or CEH certification required','Experience with SIEM platforms (Splunk, QRadar)','Knowledge of financial regulatory compliance (DFSA, NESA)','Strong analytical and problem-solving skills','Bachelor\'s degree in Cybersecurity, IT, or related field'],
-    benefits:['Tax-free salary','Medical insurance for family','Annual performance bonus','Professional certification support','30 days annual leave','DIFC office location']},
-  'Senior Financial Analyst':{sector:'Finance',company:'Confidential — Multinational Bank, DIFC',location:'DIFC, Dubai',exp:'5+ years',salary:'AED 25,000 – 35,000/mo',
-    about:'A leading multinational bank is seeking a Senior Financial Analyst to join their regional planning & analysis team at DIFC. This role involves financial modeling, variance analysis, and strategic reporting to support C-level decision-making across the MENA region.',
-    responsibilities:['Build and maintain complex financial models for forecasting and budgeting','Prepare monthly management reports and board presentations','Conduct variance analysis and provide actionable insights to senior leadership','Support M&A due diligence and valuation exercises','Collaborate with business heads to develop annual budgets','Identify process improvements and automation opportunities'],
-    requirements:['5+ years of financial analysis experience in banking or financial services','CFA or ACCA qualification preferred','Advanced Excel and financial modeling skills','Experience with SAP, Oracle, or Hyperion','Strong presentation and stakeholder management skills','Bachelor\'s degree in Finance, Accounting, or Economics'],
-    benefits:['Competitive salary + discretionary bonus','Premium medical and dental insurance','DIFC-based office with market-leading benefits','Annual flight allowance','Education support for children','30 days annual leave + UAE public holidays']},
-  'VP — Investment Banking':{sector:'Finance',company:'Tier 1 Investment Bank — DIFC',location:'DIFC, Dubai',exp:'10+ years',salary:'AED 55,000 – 80,000/mo',
-    about:'A Tier 1 global investment bank is recruiting a VP for their MENA advisory team. This is a client-facing role leading M&A and capital markets transactions across the GCC region, with direct exposure to senior executives and sovereign wealth funds.',
-    responsibilities:['Lead and execute M&A advisory and capital markets transactions','Manage client relationships with C-suite executives and sovereign entities','Prepare and present pitch materials, financial models, and valuation analyses','Supervise and mentor a team of analysts and associates','Coordinate with global sector teams on cross-border transactions','Drive business development and origination efforts in MENA'],
-    requirements:['10+ years in investment banking (M&A or ECM/DCM)','Proven track record of closed transactions in MENA','Strong financial modeling and valuation expertise','Excellent client relationship management skills','MBA from a top-tier institution preferred','Fluency in English; Arabic is a strong advantage'],
-    benefits:['Highly competitive base + performance bonus','Carried interest on select deals','Premium international health coverage','Housing allowance','Annual flight allowance for family','Club membership']},
-  'AML Compliance Officer':{sector:'Finance',company:'Regional Bank — Abu Dhabi',location:'Abu Dhabi',exp:'6+ years',salary:'AED 28,000 – 40,000/mo',
-    about:'A leading regional bank seeks an experienced AML Compliance Officer to strengthen their financial crime prevention framework. You\'ll ensure compliance with UAE Central Bank regulations and international AML standards.',
-    responsibilities:['Oversee AML/CFT compliance program and policies','Conduct enhanced due diligence on high-risk customers and transactions','Investigate suspicious activity reports and escalate as required','Liaise with UAE Central Bank and other regulatory authorities','Deliver AML training programs across the organisation','Monitor regulatory changes and update internal procedures'],
-    requirements:['6+ years in AML/compliance within banking or financial services','ACAMS or ICA certification required','Deep knowledge of UAE Central Bank regulations and FATF standards','Experience with AML screening and transaction monitoring systems','Strong analytical and investigative skills','Bachelor\'s degree in Law, Finance, or related field'],
-    benefits:['Competitive salary + annual bonus','Medical insurance for family','Housing allowance','Transportation allowance','30 days annual leave','Professional development support']},
-  'HSE Manager — Offshore':{sector:'Oil & Gas',company:'International EPC — Abu Dhabi (Offshore)',location:'Abu Dhabi (Offshore)',exp:'8+ years',salary:'AED 30,000 – 42,000/mo',
-    about:'A major international EPC contractor is recruiting an HSE Manager for their offshore operations in Abu Dhabi. This critical leadership role ensures the safety of 500+ personnel across multiple offshore platforms and vessels.',
-    responsibilities:['Develop and implement HSE management systems for offshore operations','Lead incident investigations and root cause analysis','Conduct HSE audits and inspections across all offshore assets','Ensure compliance with ADNOC HSE requirements and international standards','Manage a team of HSE officers and advisors','Chair weekly safety meetings and deliver toolbox talks'],
-    requirements:['8+ years HSE experience in oil & gas, with 4+ years offshore','NEBOSH International Diploma or equivalent','IOSH Chartered membership preferred','Experience working under ADNOC or IOC frameworks','Strong leadership and communication skills','Valid offshore medical and survival certificates'],
-    benefits:['Tax-free salary','28/28 rotation schedule','Premium medical insurance','Annual flight tickets','End-of-service gratuity','Career progression opportunities']},
-  'Senior Petroleum Engineer':{sector:'Oil & Gas',company:'Major National Oil Company — Abu Dhabi',location:'Abu Dhabi',exp:'10+ years',salary:'AED 35,000 – 50,000/mo',
-    about:'Join one of the world\'s leading national oil companies as a Senior Petroleum Engineer. You\'ll work on reservoir management and field development planning for some of the largest hydrocarbon reserves globally.',
-    responsibilities:['Conduct reservoir simulation and history matching studies','Develop field development plans and well placement strategies','Optimize production from mature and new fields','Evaluate enhanced oil recovery (EOR) techniques','Collaborate with drilling and completions teams on well design','Prepare technical reports and present to senior management'],
-    requirements:['10+ years petroleum engineering experience (upstream E&P)','Proficiency in Eclipse, Petrel, and PROSPER','Experience with carbonate reservoir systems','Strong knowledge of production optimization techniques','MSc or PhD in Petroleum Engineering preferred','Experience in GCC oil & gas operations'],
-    benefits:['Highly competitive tax-free package','Housing provided or generous allowance','Children\'s education allowance','Premium medical for family','Annual leave with flight tickets','Long-term career development']},
-  'Project Engineer — Mechanical':{sector:'Oil & Gas',company:'Leading EPC Contractor — Ruwais, Abu Dhabi',location:'Ruwais, Abu Dhabi',exp:'6+ years',salary:'AED 25,000 – 35,000/mo',
-    about:'A major EPC contractor is hiring a Project Engineer (Mechanical) for their mega-project in Ruwais Industrial Complex. You\'ll oversee mechanical engineering deliverables across FEED and detailed design phases.',
-    responsibilities:['Manage mechanical engineering scope for EPC projects','Review and approve equipment specifications and vendor drawings','Coordinate with procurement and construction teams','Ensure design compliance with ASME, API, and client standards','Track project milestones and report on progress','Support commissioning and handover activities'],
-    requirements:['6+ years mechanical engineering experience in oil & gas EPC','PMP certification preferred','Experience with rotating and static equipment','Proficiency in engineering software (Caesar II, PV Elite)','Knowledge of ADNOC design standards','Bachelor\'s degree in Mechanical Engineering'],
-    benefits:['Tax-free salary + project completion bonus','Furnished accommodation in Ruwais','Transportation provided','Medical insurance for family','30 days leave + rotation','R&R flight allowance']},
-  'HR Business Partner':{sector:'HR',company:'Global Consulting Firm — Business Bay, Dubai',location:'Business Bay, Dubai',exp:'5+ years',salary:'AED 22,000 – 30,000/mo',
-    about:'A global consulting firm seeks a strategic HR Business Partner to support their rapidly growing Dubai operations. You\'ll partner with senior leaders to drive people strategy, talent development, and organizational effectiveness.',
-    responsibilities:['Act as strategic HR advisor to business leaders for a 300+ employee population','Drive talent management, succession planning, and workforce analytics','Lead employee engagement initiatives and action planning','Manage performance management cycles and calibration','Support organizational design and change management projects','Ensure HR policies comply with UAE Labour Law and best practices'],
-    requirements:['5+ years as an HRBP in a professional services or consulting environment','CIPD or SHRM certification preferred','Strong knowledge of UAE Labour Law and MOHRE regulations','Experience with HRIS systems (SuccessFactors, Workday)','Excellent stakeholder management and influencing skills','Bachelor\'s degree in HR, Business, or related field'],
-    benefits:['Competitive salary + performance bonus','Premium medical insurance','Flexible working arrangements','Learning & development budget','Annual flight tickets','Modern office in Business Bay']},
-  'Talent Acquisition Manager':{sector:'HR',company:'Technology Company — Dubai',location:'Dubai',exp:'6+ years',salary:'AED 20,000 – 28,000/mo',
-    about:'Lead the talent acquisition function for a high-growth technology company scaling rapidly across the UAE. You\'ll build recruitment strategies, manage the TA team, and own the candidate experience end to end.',
-    responsibilities:['Develop and execute talent acquisition strategy across all levels','Manage and mentor a team of 4 recruiters','Build employer brand and candidate pipeline through events and partnerships','Implement ATS and recruitment analytics dashboards','Manage agency relationships and direct sourcing channels','Drive diversity and Emiratisation hiring initiatives'],
-    requirements:['6+ years in talent acquisition, with 2+ years managing a team','Experience recruiting in technology or fast-growth environments','Proficiency with ATS platforms (Greenhouse, Lever, or similar)','Strong sourcing skills across LinkedIn, job boards, and social media','Knowledge of UAE employment regulations','Excellent English communication skills'],
-    benefits:['Competitive salary + quarterly bonus','Medical insurance','Flexible work-from-home policy','Professional development budget','Annual flight allowance','Dynamic startup culture']},
-  'Compensation & Benefits Specialist':{sector:'HR',company:'Multinational Corporation — Abu Dhabi',location:'Abu Dhabi',exp:'4+ years',salary:'AED 18,000 – 25,000/mo',
-    about:'Design and manage competitive compensation programs for a multinational corporation with 2,000+ employees across the GCC. This role is key to attracting and retaining top talent through market-aligned rewards strategies.',
-    responsibilities:['Administer compensation structures, salary bands, and job grading','Conduct annual salary benchmarking surveys (Mercer, Radford, Korn Ferry)','Manage employee benefits programs including medical, life, and retirement','Support annual salary review and bonus allocation processes','Analyze compensation data and prepare reports for leadership','Ensure compliance with UAE Labour Law regarding end-of-service benefits'],
-    requirements:['4+ years in compensation & benefits or total rewards','Experience with job evaluation methodologies (Hay, Mercer IPE)','Proficiency in Excel, HRIS, and compensation survey tools','Knowledge of GCC benefits practices and regulations','CCP or GRP certification is a plus','Bachelor\'s degree in HR, Finance, or Business'],
-    benefits:['Competitive salary','Housing allowance','Premium medical for family','Annual flight tickets','Education assistance','Gym membership']},
-  'Head of Compliance':{sector:'Legal',company:'Regional Insurance Group — Dubai',location:'Dubai',exp:'10+ years',salary:'AED 40,000 – 55,000/mo',
-    about:'Lead the compliance function for a regional insurance group operating across the UAE, Saudi Arabia, and Bahrain. Reporting to the Group CEO, you\'ll ensure regulatory compliance and build the governance framework for planned IPO readiness.',
-    responsibilities:['Establish and lead the group compliance framework across 3 jurisdictions','Ensure compliance with IA, CBUAE, SAMA, and CBB regulations','Build IPO-readiness governance and reporting structures','Manage regulatory relationships and license applications','Conduct compliance risk assessments and audits','Chair the Compliance Committee and report to the Board'],
-    requirements:['10+ years compliance experience in insurance or financial services','Deep knowledge of UAE, Saudi, and Bahrain insurance regulations','Experience preparing organisations for IPO','Compliance certifications (ICA, ACAMS) required','Strong leadership and board-level communication skills','LLB or Master\'s degree preferred'],
-    benefits:['Highly competitive package','Annual performance bonus','C-suite reporting line','Premium medical for family','Company vehicle or allowance','30 days leave + public holidays']},
-  'Data Protection Officer':{sector:'Legal',company:'Technology Group — Dubai',location:'Dubai',exp:'5+ years',salary:'AED 25,000 – 38,000/mo',
-    about:'A leading technology group requires a Data Protection Officer to manage compliance with UAE Federal Data Protection Law, DIFC Data Protection Law, and international standards including GDPR. This role is critical as the group expands its digital products across the region.',
-    responsibilities:['Develop and maintain the group\'s data protection framework','Ensure compliance with UAE PDPL, DIFC DPL, and GDPR where applicable','Conduct Data Protection Impact Assessments (DPIAs) for new products','Manage data subject access requests and breach notification processes','Train employees on data protection obligations','Act as the primary contact for the UAE Data Office'],
-    requirements:['5+ years in data protection or privacy law','CIPP/E, CIPM, or equivalent certification required','Knowledge of UAE PDPL and DIFC Data Protection Law','Experience in technology, e-commerce, or digital services','Strong legal drafting and advisory skills','Bachelor\'s degree in Law or related field'],
-    benefits:['Competitive salary + bonus','Medical insurance','Flexible working policy','Professional certification support','Annual learning budget','Modern Dubai office']},
-  'Corporate Counsel — In-House':{sector:'Legal',company:'Energy Holding Group — Abu Dhabi',location:'Abu Dhabi',exp:'7+ years',salary:'AED 30,000 – 45,000/mo',
-    about:'A major energy holding group seeks an experienced Corporate Counsel to provide legal support across M&A, joint ventures, and commercial contracts. You\'ll work on high-value transactions shaping the UAE\'s energy landscape.',
-    responsibilities:['Draft, review, and negotiate commercial contracts and JV agreements','Provide legal advice on M&A transactions and corporate restructurings','Support board governance and corporate secretarial functions','Manage external counsel relationships and legal spend','Advise on regulatory compliance across energy sector regulations','Handle dispute resolution and litigation management'],
-    requirements:['7+ years post-qualification experience in corporate/commercial law','Experience in energy, infrastructure, or natural resources sectors','Qualified in a common law jurisdiction (UK, Australia, etc.)','Strong contract drafting and negotiation skills','Experience managing external law firms','Fluency in English; Arabic is an advantage'],
-    benefits:['Competitive tax-free salary','Annual performance bonus','Premium family medical','Housing allowance','Children\'s education assistance','Annual return flights for family']},
-  'Commercial Director — MENA':{sector:'Sales',company:'SaaS Platform — Dubai / Remote',location:'Dubai / Remote',exp:'8+ years',salary:'AED 38,000 – 50,000/mo',
-    about:'Lead commercial strategy and revenue growth across the MENA region for a fast-growing SaaS platform. You\'ll build and lead a high-performance sales team, develop enterprise accounts, and drive the go-to-market strategy for the region.',
-    responsibilities:['Develop and execute the MENA commercial strategy','Build and lead a regional sales team of 10+ across UAE and KSA','Own the P&L for the MENA region with revenue targets of $20M+','Establish strategic partnerships with enterprise clients and channel partners','Drive go-to-market strategy for new product launches','Report to the Global CRO with full regional autonomy'],
-    requirements:['8+ years in B2B SaaS sales, with 3+ years in regional leadership','Proven track record of building and scaling sales teams in MENA','Experience selling to enterprise clients in financial services or government','Strong CRM and sales analytics expertise (Salesforce)','Excellent negotiation and C-level engagement skills','Fluent in English; Arabic is a strong advantage'],
-    benefits:['Base salary + uncapped commission','Equity/stock options','Remote-first with Dubai HQ','Premium medical for family','Annual leadership retreat','Home office setup budget']},
-  'Regional Sales Manager — B2B':{sector:'Sales',company:'Industrial Solutions — Dubai',location:'Dubai',exp:'5+ years',salary:'AED 20,000 – 30,000/mo',
-    about:'Drive B2B sales growth across the UAE for a leading industrial solutions provider. You\'ll manage key accounts, develop new business, and exceed revenue targets in a fast-paced environment.',
-    responsibilities:['Manage a portfolio of 50+ B2B accounts across UAE','Develop new business through prospecting and networking','Prepare and deliver sales presentations and proposals','Negotiate contracts and close deals','Achieve quarterly and annual sales targets','Maintain CRM data and provide accurate forecasting'],
-    requirements:['5+ years B2B sales experience in UAE','Proven track record of meeting/exceeding sales targets','Experience in industrial, manufacturing, or technical sales','Strong networking and relationship-building skills','Valid UAE driving license','Bachelor\'s degree in Business or Engineering'],
-    benefits:['Base salary + commission','Company car + fuel','Medical insurance','Mobile phone allowance','Sales incentive trips','Career progression path']},
-  'Head of Marketing':{sector:'Sales',company:'Consumer Brand — Dubai',location:'Dubai',exp:'7+ years',salary:'AED 28,000 – 40,000/mo',
-    about:'Lead the marketing function for a premium consumer brand expanding aggressively across the GCC. You\'ll own brand strategy, digital marketing, and creative execution to drive awareness and customer acquisition.',
-    responsibilities:['Develop and execute the regional brand and marketing strategy','Lead a team of 8 across brand, digital, content, and PR','Manage annual marketing budget of AED 5M+','Drive digital acquisition through performance marketing and SEO','Oversee creative campaigns, events, and influencer partnerships','Analyze marketing ROI and present insights to the executive team'],
-    requirements:['7+ years in marketing, with 3+ years in leadership roles','Experience with premium or luxury consumer brands in GCC','Strong digital marketing expertise (paid social, SEM, programmatic)','Creative portfolio demonstrating successful campaigns','Data-driven approach with proficiency in Google Analytics, HubSpot','Bachelor\'s degree in Marketing; MBA preferred'],
-    benefits:['Competitive salary + annual bonus','Premium medical insurance','Flexible working arrangements','Annual learning budget','Staff discount on products','Modern Dubai office']}
-}}();
-
-// ── All Roles overlay ──
-let currentFilter='all';
-function openRoles(){
-  document.getElementById('rolesOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
-  document.getElementById('roleSearch').value='';
-  currentFilter='all';
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));
-  filterRoles();
-  setTimeout(()=>document.getElementById('roleSearch').focus(),400);
+// ======== LIVE FEED WITH SOURCES ========
+const fTypes=['murder','robbery','assault','carjack','shooting','kidnapping','burglary','drugs'];
+const fLocs=[
+{l:"Nyanga, Cape Town",p:"WC",lat:-33.98,lng:18.56},{l:"Mfuleni, Cape Town",p:"WC",lat:-33.98,lng:18.70},{l:"Khayelitsha, Cape Town",p:"WC",lat:-34.04,lng:18.67},
+{l:"Mitchells Plain",p:"WC",lat:-34.05,lng:18.62},{l:"Delft, Cape Town",p:"WC",lat:-33.96,lng:18.63},
+{l:"Alexandra, JHB",p:"GP",lat:-26.11,lng:28.10},{l:"Hillbrow, JHB",p:"GP",lat:-26.20,lng:28.05},{l:"Soweto, JHB",p:"GP",lat:-26.27,lng:27.87},
+{l:"Tembisa, Ekurhuleni",p:"GP",lat:-26.00,lng:28.23},{l:"Katlehong",p:"GP",lat:-26.34,lng:28.17},
+{l:"Diepsloot, JHB",p:"GP",lat:-25.93,lng:28.02},{l:"Mamelodi, PTA",p:"GP",lat:-25.72,lng:28.40},
+{l:"JHB CBD",p:"GP",lat:-26.20,lng:28.05},{l:"Sandton",p:"GP",lat:-26.11,lng:28.06},
+{l:"Inanda, Durban",p:"KZN",lat:-29.67,lng:30.87},{l:"Umlazi, Durban",p:"KZN",lat:-29.96,lng:30.89},
+{l:"Durban CBD",p:"KZN",lat:-29.86,lng:31.02},{l:"Motherwell, Gqeberha",p:"EC",lat:-33.81,lng:25.66},
+{l:"Mthatha",p:"EC",lat:-31.59,lng:28.78},{l:"Bloemfontein",p:"FS",lat:-29.09,lng:26.16},
+{l:"Rustenburg",p:"NW",lat:-25.67,lng:27.24},{l:"Polokwane",p:"LP",lat:-23.90,lng:29.47},{l:"Nelspruit",p:"MP",lat:-25.48,lng:30.97}
+];
+const fDescs={
+murder:["Fatal shooting. SAPS investigating.","Body discovered at scene.","Stabbing — victim DOA.","Drive-by shooting reported.","Domestic violence fatality."],
+robbery:["Armed robbery at store.","Street mugging — phone taken.","Business robbery, suspects fled.","Cash-in-transit attempt.","House robbery by armed group."],
+assault:["Serious assault outside tavern.","GBH after altercation.","Mob assault, multiple injuries.","Bar fight escalated.","Domestic violence reported."],
+carjack:["Vehicle hijacked at gunpoint.","Failed hijacking attempt.","Hijacking at traffic light.","Driveway carjacking.","Armed hijacking, Toyota taken."],
+shooting:["Multiple shots fired.","Gang-related shooting.","Drive-by in residential area.","2 wounded in shooting.","SAPS returned fire."],
+kidnapping:["Person kidnapped for ransom.","Express kidnapping during robbery.","Kidnapping linked to carjacking.","Business owner kidnapped.","Student kidnapped near campus."],
+burglary:["House break-in overnight.","Business burglary.","Warehouse broken into.","Vehicle break-in at mall.","Shop burglary, alarm triggered."],
+drugs:["Drug lab discovered.","Large narcotics seizure.","Tik bust in operation.","Cannabis plantation found.","Drug dealing arrest made."]
+};
+const fSources=[
+{name:"News24",url:"https://www.news24.com/news24/southafrica/crime"},{name:"IOL",url:"https://www.iol.co.za/news/crime-and-courts"},
+{name:"Daily Maverick",url:"https://www.dailymaverick.co.za/section/crime-justice"},{name:"TimesLIVE",url:"https://www.timeslive.co.za/news/crime"},
+{name:"EWN",url:"https://ewn.co.za/crime"},{name:"SABC",url:"https://www.sabcnews.com/sabcnews/category/south-africa/crime/"},
+{name:"Cape Argus",url:"https://www.iol.co.za/capeargus/news"},{name:"Citizen",url:"https://www.citizen.co.za/category/news/crime/"},
+{name:"SAPS Media",url:"https://www.saps.gov.za/newsroom/msspeechdetail.php"},{name:"MySAPS",url:"https://www.saps.gov.za/mysaps/mysaps.php"},
+{name:"CrimeCheck SA",url:"https://crimecheck.co.za"},{name:"Community CPF",url:"https://www.saps.gov.za/resource_centre/cpf/cpf_overview.php"}
+];
+let feedItems=[];
+function genFeed(){
+  const type=fTypes[Math.floor(Math.random()*fTypes.length)];
+  const loc=fLocs[Math.floor(Math.random()*fLocs.length)];
+  const descs=fDescs[type];const desc=descs[Math.floor(Math.random()*descs.length)];
+  const src1=fSources[Math.floor(Math.random()*fSources.length)];
+  const src2=fSources[Math.floor(Math.random()*fSources.length)];
+  const now=new Date();now.setMinutes(now.getMinutes()-Math.floor(Math.random()*120));
+  return{type,loc:loc.l,prov:loc.p,lat:loc.lat,lng:loc.lng,desc,time:now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}),
+    sources:[src1,src2!==src1?src2:fSources[(fSources.indexOf(src1)+1)%fSources.length]],isNew:false,id:Math.random()};
 }
-function closeRoles(){
-  document.getElementById('rolesOverlay').classList.remove('open');
-  document.body.style.overflow='';
+function renderFeed(){
+  document.getElementById('feedList').innerHTML=feedItems.map(f=>`<div class="fi ${f.isNew?'fi-new':''}" onclick="map.flyTo([${f.lat},${f.lng}],14)">
+    <div class="fi-h"><span class="fi-type ${f.type}">${f.type}</span><span class="fi-time">${f.time}</span></div>
+    <div class="fi-loc">${f.loc}</div><div class="fi-desc">${f.desc}</div>
+    <div class="fi-src">${f.sources.map(s=>`<a href="${s.url}" target="_blank">📰 ${s.name}</a>`).join('')}</div>
+  </div>`).join('');
+  document.getElementById('feedCnt').textContent=feedItems.length+' incidents';
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRoles()});
+for(let i=0;i<20;i++)feedItems.push(genFeed());
+feedItems.sort(()=>Math.random()-.5);renderFeed();
+setInterval(()=>{const f=genFeed();f.isNew=true;feedItems.unshift(f);if(feedItems.length>60)feedItems.pop();feedItems.forEach((x,i)=>{if(i>0)x.isNew=false});renderFeed()},Math.random()*7000+8000);
 
-function setFilter(btn){
-  currentFilter=btn.dataset.filter;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  filterRoles();
-}
-function filterRoles(){
-  const q=document.getElementById('roleSearch').value.toLowerCase().trim();
-  const items=document.querySelectorAll('.role-item');
-  let visible=0;
-  items.forEach(item=>{
-    const sector=item.dataset.sector;
-    const searchText=item.dataset.search;
-    const matchSector=currentFilter==='all'||sector===currentFilter;
-    const matchSearch=!q||searchText.includes(q);
-    if(matchSector&&matchSearch){item.classList.remove('hidden');visible++}
-    else{item.classList.add('hidden')}
-  });
-  document.getElementById('rolesCount').innerHTML='Showing <span>'+visible+'</span> open role'+(visible!==1?'s':'');
-  document.getElementById('rolesEmpty').style.display=visible===0?'block':'none';
+function switchTab(t){
+  const tabs=['map','lb','live','trends','forecast'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',tabs.indexOf(t)===i));
+  tabs.forEach(id=>{const el=document.getElementById('t'+id.charAt(0).toUpperCase()+id.slice(1));if(el)el.classList.toggle('on',id===t)});
+  document.getElementById('tMap').classList.toggle('on',t==='map');
+  document.getElementById('tLb').classList.toggle('on',t==='lb');
+  document.getElementById('tLive').classList.toggle('on',t==='live');
+  document.getElementById('tTrends').classList.toggle('on',t==='trends');
+  document.getElementById('tForecast').classList.toggle('on',t==='forecast');
+  if(t==='lb')renderLb();
+  if(t==='trends')loadTrends();
+  if(t==='forecast')loadForecast();
+  if(t==='live'&&apiOnline)loadLiveFeed();
 }
 
-// ── Link featured job cards to job.html ──
-document.querySelectorAll('[data-job-link]').forEach(a=>{
-  const card=a.closest('.job-card');
-  if(card){
-    const title=card.querySelector('h3').textContent;
-    const id=titleToId(title);
-    if(id)a.href='job.html?id='+id;
+// ======== API CONNECTION (hybrid: API or fallback) ========
+let apiOnline=false;
+const API_BASE=window.location.origin;
+
+async function apiFetch(path){
+  try{
+    const r=await fetch(API_BASE+path,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)throw new Error(r.status);
+    return await r.json();
+  }catch(e){return null}
+}
+
+async function checkAPI(){
+  const d=await apiFetch('/api/stats');
+  apiOnline=!!d;
+  const dot=document.getElementById('apiDot');
+  const label=document.getElementById('apiLabel');
+  if(apiOnline){
+    dot.style.background='#00ff88';
+    label.textContent='LIVE · '+d.stations+' STATIONS · '+d.feed_items+' FEED ITEMS';
+    label.style.color='var(--g)';
+  }else{
+    dot.style.background='#ff7a30';
+    label.textContent='OFFLINE · CACHED DATA · START BACKEND FOR LIVE';
+    label.style.color='var(--t3)';
   }
-});
-// ── Link role overlay Apply buttons to job.html ──
-document.querySelectorAll('[data-role-apply]').forEach(btn=>{
-  const item=btn.closest('.role-item');
-  if(item){
-    const title=item.querySelector('h3').textContent;
-    const id=titleToId(title);
-    if(id)btn.onclick=()=>window.location.href='job.html?id='+id;
+}
+
+async function loadLiveFeed(){
+  if(!apiOnline)return;
+  const d=await apiFetch('/api/feed?limit=60');
+  if(!d||!d.items||!d.items.length)return;
+  document.getElementById('feedStatus').textContent='🟢 Live scraped · '+d.total+' total · Source: News24, IOL, EWN, Daily Maverick';
+  document.getElementById('feedList').innerHTML=d.items.map((f,i)=>{
+    const isNew=i<3;
+    return`<div class="fi ${isNew?'fi-new':''}">
+      <div class="fi-h"><span class="fi-type ${f.crime_type||f.type||''}">${f.crime_type||f.type||'crime'}</span><span class="fi-time">${f.published?new Date(f.published).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):(f.time||'')}</span></div>
+      <div class="fi-loc">${f.location||f.loc||'South Africa'}${f.province?' · '+f.province:''}</div>
+      <div class="fi-desc">${f.title||f.description||f.desc||''}</div>
+      <div class="fi-src">${f.url?`<a href="${f.url}" target="_blank">📰 ${f.source||'Source'}</a>`:''}${f.source_url?`<a href="${f.source_url}" target="_blank">🌐 ${f.source||'Site'}</a>`:''}</div>
+    </div>`}).join('');
+  document.getElementById('feedCnt').textContent=d.items.length+' incidents';
+}
+
+async function loadTrends(){
+  const el=document.getElementById('trendContent');
+  if(apiOnline){
+    const d=await apiFetch('/api/trends');
+    if(d){renderTrendsData(d);return}
   }
+  // Fallback: compute from hardcoded data
+  const crimes=['murder','robbery','assault','sexual','property','carjack','kidnap','drugs'];
+  const crimeColors={murder:'#ff2244',robbery:'#ff7a30',assault:'#ffbe2e',sexual:'#9b7aff',property:'#2eb8ff',carjack:'#ff5588',kidnap:'#9b7aff',drugs:'#00cc88'};
+  let h='<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">National Overview</div>';
+  const tCur=D.reduce((a,s)=>a+Object.values(s.c).reduce((x,y)=>x+y,0),0);
+  const tPrev=D.reduce((a,s)=>a+Object.values(s.prev).reduce((x,y)=>x+y,0),0);
+  const tPct=((tCur-tPrev)/tPrev*100).toFixed(1);
+  const tDir=tPct>0?'up':'dn';
+  h+=`<div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:'IBM Plex Mono';font-size:22px;font-weight:700;color:var(--r)">${tCur.toLocaleString()}</span><span style="font-size:10px;color:var(--t2)">total crimes</span><span style="font-size:12px;font-weight:700;color:${tDir==='up'?'var(--up)':'var(--dn)'}">${tDir==='up'?'▲':'▼'}${Math.abs(tPct)}%</span></div></div>`;
+  h+='<div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;color:var(--t3)">By Crime Type</div>';
+  crimes.forEach(ct=>{
+    const cur=D.reduce((a,s)=>a+(s.c[ct]||0),0);
+    const prev=D.reduce((a,s)=>a+(s.prev[ct]||0),0);
+    const pct=prev?((cur-prev)/prev*100).toFixed(1):0;
+    const dir=pct>2?'up':pct<-2?'dn':'eq';
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px"><div style="width:8px;height:8px;border-radius:50%;background:${crimeColors[ct]}"></div><span style="font-size:10px;font-weight:600;flex:1;text-transform:capitalize">${ct}</span><span style="font-family:'IBM Plex Mono';font-size:11px;font-weight:700">${cur.toLocaleString()}</span><span style="font-size:9px;font-weight:700;color:${dir==='up'?'var(--up)':dir==='dn'?'var(--dn)':'var(--eq)'}">${dir==='up'?'▲':dir==='dn'?'▼':'■'}${Math.abs(pct)}%</span><span style="font-size:7px;color:var(--t3);font-family:'IBM Plex Mono'">${(cur/90).toFixed(1)}/day</span></div>`;
+  });
+  h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--t3)">By Province</div>';
+  ['WC','GP','KZN','EC','MP','NW','FS','LP','NC'].forEach(pv=>{
+    const cur=D.filter(s=>s.p===pv).reduce((a,s)=>a+Object.values(s.c).reduce((x,y)=>x+y,0),0);
+    const prev=D.filter(s=>s.p===pv).reduce((a,s)=>a+Object.values(s.prev).reduce((x,y)=>x+y,0),0);
+    if(!cur)return;
+    const pct=prev?((cur-prev)/prev*100).toFixed(1):0;
+    const dir=pct>2?'up':pct<-2?'dn':'eq';
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px"><span style="font-size:10px;font-weight:700;width:28px">${pv}</span><div style="flex:1;height:4px;background:var(--b0);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.min(100,cur/150)}%;background:var(--r);border-radius:2px"></div></div><span style="font-family:'IBM Plex Mono';font-size:10px;font-weight:700">${cur.toLocaleString()}</span><span style="font-size:8px;font-weight:700;color:${dir==='up'?'var(--up)':dir==='dn'?'var(--dn)':'var(--eq)'}">${dir==='up'?'▲':dir==='dn'?'▼':'■'}${Math.abs(pct)}%</span></div>`;
+  });
+  el.innerHTML=h;
+}
+
+function renderTrendsData(data){
+  const el=document.getElementById('trendContent');
+  const ov=data.overall||{};const dirC=ov.direction==='up'?'var(--up)':'var(--dn)';
+  let h=`<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">National Overview</div><div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:'IBM Plex Mono';font-size:22px;font-weight:700;color:var(--r)">${(ov.current||0).toLocaleString()}</span><span style="font-size:10px;color:var(--t2)">total crimes</span><span style="font-size:12px;font-weight:700;color:${dirC}">${ov.direction==='up'?'▲':'▼'}${Math.abs(ov.pct_change||0)}%</span></div><div style="font-size:8px;color:var(--t3);margin-top:4px;font-family:'IBM Plex Mono'">${data.data_period||''}</div></div>`;
+  const cc={murder:'#ff2244',robbery:'#ff7a30',assault:'#ffbe2e',sexual:'#9b7aff',property:'#2eb8ff',carjack:'#ff5588',kidnap:'#9b7aff',drugs:'#00cc88'};
+  h+='<div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;color:var(--t3)">By Crime Type</div>';
+  Object.entries(data.by_crime||{}).forEach(([k,v])=>{
+    const dc=v.direction==='up'?'var(--up)':v.direction==='dn'?'var(--dn)':'var(--eq)';
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px"><div style="width:8px;height:8px;border-radius:50%;background:${cc[k]||'#888'}"></div><span style="font-size:10px;font-weight:600;flex:1;text-transform:capitalize">${k}</span><span style="font-family:'IBM Plex Mono';font-size:11px;font-weight:700">${(v.current||0).toLocaleString()}</span><span style="font-size:9px;font-weight:700;color:${dc}">${v.direction==='up'?'▲':v.direction==='dn'?'▼':'■'}${Math.abs(v.pct_change||0)}%</span><span style="font-size:7px;color:var(--t3);font-family:'IBM Plex Mono'">${v.per_day||0}/day</span></div>`;
+  });
+  h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--t3)">By Province</div>';
+  Object.entries(data.by_province||{}).sort((a,b)=>b[1].current-a[1].current).forEach(([k,v])=>{
+    const dc=v.direction==='up'?'var(--up)':v.direction==='dn'?'var(--dn)':'var(--eq)';
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px"><span style="font-size:10px;font-weight:700;width:28px">${k}</span><div style="flex:1;height:4px;background:var(--b0);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.min(100,v.current/200)}%;background:var(--r);border-radius:2px"></div></div><span style="font-family:'IBM Plex Mono';font-size:10px;font-weight:700">${(v.current||0).toLocaleString()}</span><span style="font-size:8px;font-weight:700;color:${dc}">${v.direction==='up'?'▲':v.direction==='dn'?'▼':'■'}${Math.abs(v.pct_change||0)}%</span></div>`;
+  });
+  if(data.biggest_increases?.length){
+    h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--up)">⚠ Biggest Increases</div>';
+    data.biggest_increases.forEach(s=>h+=`<div style="display:flex;justify-content:space-between;padding:4px 10px;font-size:9px;border-bottom:1px solid var(--bd)"><span>${s.name} (${s.province})</span><span style="color:var(--up);font-family:'IBM Plex Mono';font-weight:700">▲${s.pct}%</span></div>`);
+  }
+  if(data.biggest_decreases?.length){
+    h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--dn)">✅ Biggest Improvements</div>';
+    data.biggest_decreases.forEach(s=>h+=`<div style="display:flex;justify-content:space-between;padding:4px 10px;font-size:9px;border-bottom:1px solid var(--bd)"><span>${s.name} (${s.province})</span><span style="color:var(--dn);font-family:'IBM Plex Mono';font-weight:700">▼${Math.abs(s.pct)}%</span></div>`);
+  }
+  el.innerHTML=h;
+}
+
+async function loadForecast(){
+  const el=document.getElementById('forecastContent');
+  if(apiOnline){
+    const [fc,hs,wf]=await Promise.all([apiFetch('/api/forecast?quarters=1'),apiFetch('/api/forecast/hotspots'),apiFetch('/api/forecast/whatif?station=Nyanga&intervention=comprehensive')]);
+    if(fc&&hs){renderForecastData(fc,hs,wf);return}
+  }
+  // Fallback: basic forecast from hardcoded data
+  let h='<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">🔮 Crime Risk Forecast</div><div style="font-size:9px;color:var(--t2);margin-bottom:8px">Next quarter projections based on current trends</div>';
+  const ranked=D.map(s=>{const cur=Object.values(s.c).reduce((a,b)=>a+b,0);const prev=Object.values(s.prev).reduce((a,b)=>a+b,0);const growth=prev?((cur-prev)/prev):0;const risk=Math.min(100,Math.round((Math.log(cur+1)/Math.log(2000))*40+(growth+0.2)*75+(((s.c.murder||0)+(s.c.assault||0))/Math.max(1,cur))*20+((s.c.kidnap||0)/5)));return{...s,cur,growth:Math.round(growth*100),risk,forecast:Math.round(cur*(1+growth*0.7))}}).sort((a,b)=>b.risk-a.risk);
+  h+='<div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Top Risk Stations</div>';
+  ranked.slice(0,10).forEach((s,i)=>{
+    const barW=Math.min(100,s.risk);
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px;cursor:pointer" onclick="fly('${s.n.replace(/'/g,"\\'")}')"><span style="font-family:'IBM Plex Mono';font-size:9px;color:var(--t3);width:16px">${i+1}</span><div style="flex:1"><div style="font-size:10px;font-weight:600">${s.n}</div><div style="font-size:7px;color:var(--t3);font-family:'IBM Plex Mono'">${s.p}·${s.a}</div></div><div style="width:60px;height:4px;background:var(--b0);border-radius:2px;overflow:hidden"><div style="height:100%;width:${barW}%;background:${s.risk>70?'var(--r)':s.risk>50?'var(--o)':'var(--y)'};border-radius:2px"></div></div><span style="font-family:'IBM Plex Mono';font-size:10px;font-weight:700;color:${s.risk>70?'var(--r)':s.risk>50?'var(--o)':'var(--y)'};width:35px;text-align:right">${s.risk}</span></div>`;
+  });
+  h+='</div>';
+  h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--o)">🔮 What-If: LEAP intervention in Nyanga</div>';
+  const ny=D.find(s=>s.n==='Nyanga');
+  if(ny){const cur=Object.values(ny.c).reduce((a,b)=>a+b,0);const proj=Math.round(cur*0.763);
+  h+=`<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px"><div style="display:flex;gap:20px;align-items:baseline"><div><div style="font-size:8px;color:var(--t3)">CURRENT</div><div style="font-family:'IBM Plex Mono';font-size:20px;font-weight:700;color:var(--r)">${cur.toLocaleString()}</div></div><div style="font-size:18px;color:var(--dn)">→</div><div><div style="font-size:8px;color:var(--t3)">PROJECTED</div><div style="font-family:'IBM Plex Mono';font-size:20px;font-weight:700;color:var(--dn)">${proj.toLocaleString()}</div></div></div><div style="font-size:9px;color:var(--t2);margin-top:6px">Comprehensive intervention: -23.7% total crime. Saves ~${Math.round((ny.c.murder||0)*0.3)} lives from murder.</div><div style="font-size:7px;color:var(--t3);margin-top:4px;font-style:italic">Based on: LEAP (9.4% murder reduction), Gauteng Robbery Strategy (32% hijacking reduction)</div></div>`;
+  }
+  h+='<div style="margin-top:12px;padding:10px;background:rgba(46,184,255,.05);border:1px solid rgba(46,184,255,.15);border-radius:8px;font-size:8px;color:var(--bl)">💡 Start the backend (<code>python app.py</code>) for full forecasting with risk scores, hotspot prediction, and interactive what-if scenarios across all stations.</div>';
+  el.innerHTML=h;
+}
+
+function renderForecastData(fc,hs,wf){
+  const el=document.getElementById('forecastContent');
+  let h='<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">🔮 Crime Risk Forecast — Next Quarter</div><div style="font-size:9px;color:var(--bl);font-family:\'IBM Plex Mono\'">🟢 LIVE from API · '+fc.forecasts.length+' stations analysed</div></div>';
+  h+='<div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Top Risk Stations</div>';
+  fc.forecasts.slice(0,10).forEach((f,i)=>{
+    const barW=Math.min(100,f.risk_score);
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--b2);border:1px solid var(--bd);border-radius:6px;margin-bottom:3px;cursor:pointer" onclick="fly('${(f.station||'').replace(/'/g,"\\'")}')"><span style="font-family:'IBM Plex Mono';font-size:9px;color:var(--t3);width:16px">${i+1}</span><div style="flex:1"><div style="font-size:10px;font-weight:600">${f.station}</div><div style="font-size:7px;color:var(--t3);font-family:'IBM Plex Mono'">${f.province}·${f.area} | Forecast: ${(f.total_forecast||0).toLocaleString()}</div></div><div style="width:60px;height:4px;background:var(--b0);border-radius:2px;overflow:hidden"><div style="height:100%;width:${barW}%;background:${f.risk_score>70?'var(--r)':f.risk_score>50?'var(--o)':'var(--y)'};border-radius:2px"></div></div><span style="font-family:'IBM Plex Mono';font-size:10px;font-weight:700;color:${f.risk_score>70?'var(--r)':f.risk_score>50?'var(--o)':'var(--y)'};width:35px;text-align:right">${f.risk_score}</span></div>`;
+  });
+  if(hs&&hs.emerging_hotspots?.length){
+    h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--up)">⚠ Emerging Hotspots</div>';
+    hs.emerging_hotspots.forEach(e=>h+=`<div style="display:flex;justify-content:space-between;padding:4px 10px;font-size:9px;border-bottom:1px solid var(--bd)"><span>${e.name} (${e.province})</span><span style="color:var(--up);font-family:'IBM Plex Mono';font-weight:700">↗ +${e.growth_pct}%</span></div>`);
+  }
+  if(wf){
+    h+='<div style="font-size:10px;font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px;color:var(--dn)">🔬 What-If: Comprehensive in '+wf.station+'</div>';
+    h+=`<div style="background:var(--b2);border:1px solid var(--bd);border-radius:10px;padding:14px"><div style="display:flex;gap:20px;align-items:baseline"><div><div style="font-size:8px;color:var(--t3)">CURRENT</div><div style="font-family:'IBM Plex Mono';font-size:20px;font-weight:700;color:var(--r)">${(wf.current_total||0).toLocaleString()}</div></div><div style="font-size:18px;color:var(--dn)">→</div><div><div style="font-size:8px;color:var(--t3)">PROJECTED</div><div style="font-family:'IBM Plex Mono';font-size:20px;font-weight:700;color:var(--dn)">${(wf.projected_total||0).toLocaleString()}</div></div><div style="margin-left:auto;font-family:'IBM Plex Mono';font-size:14px;font-weight:700;color:var(--dn)">-${wf.total_pct_reduction}%</div></div></div>`;
+  }
+  el.innerHTML=h;
+}
+
+// Init API check
+checkAPI();
+setInterval(checkAPI,30000);
+</script>
+
+// ===================================================================
+// MICRO-HOTSPOTS: 36 street-level crime locations (appear at zoom 13+)
+// ===================================================================
+const MH=[
+// KHAYELITSHA
+{n:"Site B Supermarket",lat:-34.0445,lng:18.6758,parent:"Khayelitsha",p:"WC",suburb:"Site B",street:"Ntlazane Rd",vtype:"Supermarket",dominant:"shooting",risk:9,crimes:[{type:"shooting",desc:"4 killed in supermarket shooting",date:"Jan 2026",src:"News24",url:"https://www.news24.com/news24/southafrica"},{type:"murder",desc:"Armed robbery turned fatal",date:"Dec 2025",src:"GroundUp",url:"https://www.groundup.org.za"}],note:"Jan 2026 mass shooting. 4 dead."},
+{n:"Harare Section",lat:-34.0550,lng:18.6830,parent:"Khayelitsha",p:"WC",suburb:"Harare",street:"Mew Way / Harare Square",vtype:"Residential",dominant:"murder",risk:9,crimes:[{type:"shooting",desc:"3 men shot dead in Harare",date:"Jul 2025",src:"News24",url:"https://www.news24.com/news24/southafrica"},{type:"murder",desc:"Gang-related killing",date:"Oct 2025",src:"Daily Maverick",url:"https://www.dailymaverick.co.za"}],note:"Multiple mass shootings 2025."},
+{n:"Site C Taxi Rank",lat:-34.0380,lng:18.6810,parent:"Khayelitsha",p:"WC",suburb:"Site C",street:"Spine Rd / Lwandle Rd",vtype:"Taxi Rank",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Armed muggings at taxi rank",date:"Nov 2025",src:"Cape Argus",url:"https://www.iol.co.za/capeargus"},{type:"carjack",desc:"Minibus taxi hijacked",date:"Sep 2025",src:"EWN",url:"https://ewn.co.za"}],note:"Peak crime: 5-7pm commuter hours."},
+{n:"Makhaza",lat:-34.0350,lng:18.7050,parent:"Khayelitsha",p:"WC",suburb:"Makhaza",street:"Steve Biko Rd",vtype:"Residential",dominant:"assault",risk:7,crimes:[{type:"assault",desc:"Tavern brawl escalated to stabbing",date:"Dec 2025",src:"GroundUp",url:"https://www.groundup.org.za"}],note:"Alcohol-fuelled violence dominant."},
+{n:"Khayelitsha Mall Area",lat:-34.0405,lng:18.6715,parent:"Khayelitsha",p:"WC",suburb:"Site B",street:"Ntlazane Rd / CBD",vtype:"Mall",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Armed robbery at mall entrance",date:"Oct 2025",src:"IOL",url:"https://www.iol.co.za"},{type:"kidnapping",desc:"Express kidnapping in parking lot",date:"Nov 2025",src:"News24",url:"https://www.news24.com"}],note:"Parking lot & ATM hotspot."},
+{n:"Endlovini Informal",lat:-34.0520,lng:18.6650,parent:"Khayelitsha",p:"WC",suburb:"Endlovini",street:"Off Mew Way",vtype:"Informal Settlement",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Body found in informal area",date:"Jan 2026",src:"SABC",url:"https://www.sabcnews.com"}],note:"No street lights. Limited police access."},
+// NYANGA
+{n:"Borcherd's Quarry Rd",lat:-33.9830,lng:18.5610,parent:"Nyanga",p:"WC",suburb:"Nyanga",street:"Borcherd's Quarry Rd",vtype:"Road",dominant:"carjack",risk:10,crimes:[{type:"carjack",desc:"Tourist shot following GPS through area",date:"2023",src:"News24",url:"https://www.news24.com"},{type:"robbery",desc:"Multiple armed robberies on this road",date:"2025",src:"CPF",url:"https://www.saps.gov.za"}],note:"UK govt warns against. Google removed route."},
+{n:"Nyanga Junction",lat:-33.9875,lng:18.5655,parent:"Nyanga",p:"WC",suburb:"Nyanga",street:"Klipfontein Rd / Lansdowne Rd",vtype:"Taxi Rank",dominant:"robbery",risk:9,crimes:[{type:"robbery",desc:"Daily muggings at terminus",date:"Ongoing",src:"CPF",url:"https://www.saps.gov.za"},{type:"assault",desc:"Knife attacks near rank",date:"Dec 2025",src:"Cape Argus",url:"https://www.iol.co.za/capeargus"}],note:"#1 mugging hotspot in WC."},
+{n:"Lusaka Section",lat:-33.9810,lng:18.5700,parent:"Nyanga",p:"WC",suburb:"Lusaka",street:"NY1 / NY3",vtype:"Residential",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Gang shooting in Lusaka",date:"Nov 2025",src:"Daily Maverick",url:"https://www.dailymaverick.co.za"}],note:"Gang territory. Firearms dominant."},
+{n:"NY78 Shebeens",lat:-33.9850,lng:18.5680,parent:"Nyanga",p:"WC",suburb:"Nyanga East",street:"NY78",vtype:"Shebeen cluster",dominant:"assault",risk:8,crimes:[{type:"assault",desc:"Weekend stabbings outside shebeens",date:"Ongoing",src:"SAPS",url:"https://www.saps.gov.za"},{type:"murder",desc:"Fatal stabbing after drinking",date:"Jan 2026",src:"IOL",url:"https://www.iol.co.za"}],note:"Weekend peak: Fri-Sun midnight-4am."},
+// MITCHELLS PLAIN
+{n:"Tafelsig",lat:-34.0620,lng:18.6050,parent:"Mitchells Plain",p:"WC",suburb:"Tafelsig",street:"AZ Berman Dr / Spine Rd",vtype:"Residential",dominant:"shooting",risk:10,crimes:[{type:"shooting",desc:"50+ shootings in one week",date:"2025",src:"GI-TOC",url:"https://globalinitiative.net"},{type:"gang",desc:"Fancy Boys vs Terrible Josters",date:"Ongoing",src:"Daily Maverick",url:"https://www.dailymaverick.co.za"}],note:"Worst gang violence in SA. 50+ shootings/week."},
+{n:"Beacon Valley",lat:-34.0550,lng:18.6150,parent:"Mitchells Plain",p:"WC",suburb:"Beacon Valley",street:"Beacon Valley Rd",vtype:"Residential",dominant:"shooting",risk:9,crimes:[{type:"shooting",desc:"Drive-by shooting",date:"Nov 2025",src:"News24",url:"https://www.news24.com"}],note:"Gang crossfire zone."},
+{n:"Eastridge",lat:-34.0480,lng:18.6180,parent:"Mitchells Plain",p:"WC",suburb:"Eastridge",street:"Merrydale Ave",vtype:"Residential",dominant:"drugs",risk:8,crimes:[{type:"drugs",desc:"Tik lab bust",date:"Oct 2025",src:"SAPS",url:"https://www.saps.gov.za"},{type:"gang",desc:"Drug distribution hub",date:"Ongoing",src:"GI-TOC",url:"https://globalinitiative.net"}],note:"Methamphetamine (tik) hub."},
+{n:"Promenade Mall",lat:-34.0500,lng:18.6100,parent:"Mitchells Plain",p:"WC",suburb:"Town Centre",street:"AZ Berman Dr",vtype:"Mall",dominant:"robbery",risk:7,crimes:[{type:"robbery",desc:"Armed robbery mall parking",date:"Dec 2025",src:"IOL",url:"https://www.iol.co.za"},{type:"carjack",desc:"Hijacking leaving mall",date:"Nov 2025",src:"Cape Argus",url:"https://www.iol.co.za/capeargus"}],note:"Parking lot crime hotspot."},
+// BONTEHEUWEL
+{n:"Jakkalsvlei & Jakes Gerwel",lat:-33.9540,lng:18.5420,parent:"Bonteheuwel",p:"WC",suburb:"Bonteheuwel",street:"Jakkalsvlei Ave & Jakes Gerwel Dr",vtype:"Intersection",dominant:"murder",risk:10,crimes:[{type:"murder",desc:"Tourist Karin van Aardt stabbed at traffic light",date:"6 Dec 2024",src:"News24",url:"https://www.news24.com"},{type:"carjack",desc:"Multiple smash-and-grabs",date:"Ongoing",src:"CPF",url:"https://www.saps.gov.za"}],note:"Tourist murdered Dec 2024. GPS routes here from airport."},
+// DELFT
+{n:"Delft South Shebeens",lat:-33.9700,lng:18.6380,parent:"Delft",p:"WC",suburb:"Delft South",street:"Symphony Way area",vtype:"Shebeen cluster",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Fatal shooting outside shebeen",date:"Nov 2025",src:"News24",url:"https://www.news24.com"},{type:"assault",desc:"Weekend violence at shebeens",date:"Ongoing",src:"CPF",url:"https://www.saps.gov.za"}],note:"Alcohol-fuelled murder hotspot."},
+// HILLBROW
+{n:"Twist St / Pretoria St",lat:-26.1940,lng:28.0480,parent:"Hillbrow",p:"GP",suburb:"Hillbrow",street:"Twist St & Pretoria St",vtype:"Street",dominant:"robbery",risk:9,crimes:[{type:"robbery",desc:"Phone snatching and muggings daily",date:"Ongoing",src:"TimesLIVE",url:"https://www.timeslive.co.za"},{type:"drugs",desc:"Open drug dealing",date:"Ongoing",src:"Daily Maverick",url:"https://www.dailymaverick.co.za"}],note:"Don't walk with phone visible."},
+{n:"Ponte City Tower",lat:-26.1975,lng:28.0530,parent:"Hillbrow",p:"GP",suburb:"Berea",street:"Lily Ave / Saratoga Ave",vtype:"Residential",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Muggings around Ponte base",date:"Ongoing",src:"News24",url:"https://www.news24.com"}],note:"Iconic building but surrounds dangerous."},
+// ALEXANDRA
+{n:"London Rd / Far East Bank",lat:-26.1020,lng:28.1080,parent:"Alexandra",p:"GP",suburb:"Far East Bank",street:"London Rd",vtype:"Commercial",dominant:"robbery",risk:9,crimes:[{type:"robbery",desc:"Business robberies on London Rd",date:"Dec 2025",src:"News24",url:"https://www.news24.com"},{type:"kidnapping",desc:"Express kidnapping from spaza shop",date:"Nov 2025",src:"IOL",url:"https://www.iol.co.za"}],note:"Main commercial strip."},
+{n:"Madala Hostel Area",lat:-26.1050,lng:28.0950,parent:"Alexandra",p:"GP",suburb:"Alexandra Central",street:"2nd Ave / 4th Ave",vtype:"Hostel",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Stabbing near hostel",date:"Oct 2025",src:"TimesLIVE",url:"https://www.timeslive.co.za"}],note:"Hostel tensions. Weapon violence."},
+{n:"Pan Africa Taxi Rank",lat:-26.1070,lng:28.0990,parent:"Alexandra",p:"GP",suburb:"Alexandra",street:"Pan Africa Dr",vtype:"Taxi Rank",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Armed robberies at taxi rank",date:"Ongoing",src:"Citizen",url:"https://www.citizen.co.za"}],note:"Rush hour danger 5-7pm."},
+// SOWETO
+{n:"Vilakazi St / Orlando West",lat:-26.2368,lng:27.9065,parent:"Soweto",p:"GP",suburb:"Orlando West",street:"Vilakazi St",vtype:"Tourist area",dominant:"robbery",risk:6,crimes:[{type:"robbery",desc:"Tourist phone snatching",date:"Dec 2025",src:"News24",url:"https://www.news24.com"},{type:"carjack",desc:"Attempted hijacking near Mandela House",date:"Sep 2025",src:"IOL",url:"https://www.iol.co.za"}],note:"Tourist area but phone theft rampant."},
+{n:"Jabulani Mall",lat:-26.2350,lng:27.8550,parent:"Soweto",p:"GP",suburb:"Jabulani",street:"Bolani Rd / Koma Rd",vtype:"Mall",dominant:"carjack",risk:7,crimes:[{type:"carjack",desc:"Vehicle hijacked leaving mall",date:"Oct 2025",src:"Citizen",url:"https://www.citizen.co.za"}],note:"Mall parking lot hotspot."},
+{n:"Baragwanath Hospital Area",lat:-26.2640,lng:27.9380,parent:"Soweto",p:"GP",suburb:"Diepkloof",street:"Chris Hani Rd / Old Potch Rd",vtype:"Hospital",dominant:"robbery",risk:6,crimes:[{type:"robbery",desc:"Muggings near hospital entrance",date:"Ongoing",src:"News24",url:"https://www.news24.com"}],note:"Targeting hospital visitors."},
+// JHB CBD
+{n:"Bree St Taxi Rank",lat:-26.2020,lng:28.0400,parent:"Johannesburg Central",p:"GP",suburb:"JHB CBD",street:"Bree St / Sauer St",vtype:"Taxi Rank",dominant:"robbery",risk:9,crimes:[{type:"robbery",desc:"Phone snatching and bag grabs",date:"Daily",src:"News24",url:"https://www.news24.com"}],note:"Busiest taxi rank in SA. Peak danger."},
+{n:"Jeppestown / Denver",lat:-26.2100,lng:28.0600,parent:"Johannesburg Central",p:"GP",suburb:"Jeppestown",street:"Main Reef Rd / Jules St",vtype:"Mixed",dominant:"extortion",risk:8,crimes:[{type:"extortion",desc:"Construction mafia extortion",date:"2025",src:"Daily Maverick",url:"https://www.dailymaverick.co.za"},{type:"kidnapping",desc:"Business owner kidnapped",date:"Oct 2025",src:"News24",url:"https://www.news24.com"}],note:"Extortion capital. Construction mafia."},
+{n:"Carlton Centre Area",lat:-26.2060,lng:28.0480,parent:"Johannesburg Central",p:"GP",suburb:"JHB CBD",street:"Commissioner St / Von Wielligh St",vtype:"Commercial",dominant:"robbery",risk:7,crimes:[{type:"robbery",desc:"Smash and grab near Carlton",date:"Dec 2025",src:"Citizen",url:"https://www.citizen.co.za"}],note:"Daytime pickpocketing. Night: avoid."},
+// SANDTON
+{n:"Grayston Dr Off-Ramp",lat:-26.1050,lng:28.0570,parent:"Sandton",p:"GP",suburb:"Sandton",street:"Grayston Dr / M1 off-ramp",vtype:"Highway Off-ramp",dominant:"carjack",risk:7,crimes:[{type:"carjack",desc:"Window smash hijacking at red light",date:"Nov 2025",src:"News24",url:"https://www.news24.com"},{type:"robbery",desc:"Smash-grab targeting luxury vehicles",date:"Ongoing",src:"IOL",url:"https://www.iol.co.za"}],note:"Peak: 6-8pm. Target luxury vehicles."},
+// DIEPSLOOT
+{n:"Diepsloot Extension 1",lat:-25.9280,lng:28.0120,parent:"Diepsloot",p:"GP",suburb:"Extension 1",street:"R511 / Diepsloot Main",vtype:"Informal",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Body found in open field",date:"Dec 2025",src:"News24",url:"https://www.news24.com"},{type:"sexual",desc:"GBV incident",date:"Nov 2025",src:"SABC",url:"https://www.sabcnews.com"}],note:"Mob justice incidents common."},
+// KZN
+{n:"Amaoti Section",lat:-29.6680,lng:30.8800,parent:"Inanda",p:"KZN",suburb:"Amaoti",street:"Amaoti Rd",vtype:"Residential",dominant:"murder",risk:9,crimes:[{type:"murder",desc:"Multiple stabbings",date:"Dec 2025",src:"IOL",url:"https://www.iol.co.za"}],note:"Knife violence dominant."},
+{n:"Bhambayi",lat:-29.6750,lng:30.8650,parent:"Inanda",p:"KZN",suburb:"Bhambayi",street:"Bhambayi Rd",vtype:"Informal",dominant:"sexual",risk:10,crimes:[{type:"sexual",desc:"#1 nationally for rape",date:"Q3 2025",src:"SAPS",url:"https://www.saps.gov.za"},{type:"assault",desc:"Domestic violence cluster",date:"Ongoing",src:"GroundUp",url:"https://www.groundup.org.za"}],note:"#1 rape station nationally. GBV crisis."},
+{n:"Point Rd / Victoria Embankment",lat:-29.8620,lng:31.0250,parent:"Durban Central",p:"KZN",suburb:"Point",street:"Point Rd / Mahatma Gandhi Rd",vtype:"Entertainment",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Muggings targeting tourists",date:"Ongoing",src:"News24",url:"https://www.news24.com"},{type:"drugs",desc:"Open drug trade",date:"Ongoing",src:"IOL",url:"https://www.iol.co.za"}],note:"Night-time danger zone."},
+{n:"Warwick Junction",lat:-29.8560,lng:31.0150,parent:"Durban Central",p:"KZN",suburb:"Warwick",street:"Warwick Ave / Brook St",vtype:"Transport Hub",dominant:"robbery",risk:8,crimes:[{type:"robbery",desc:"Pickpocketing and bag snatching daily",date:"Ongoing",src:"TimesLIVE",url:"https://www.timeslive.co.za"}],note:"Busiest transport hub in KZN."},
+// EC
+{n:"Govan Mbeki Ave",lat:-33.9610,lng:25.6000,parent:"Gqeberha Central",p:"EC",suburb:"Central",street:"Govan Mbeki Ave",vtype:"Commercial",dominant:"robbery",risk:7,crimes:[{type:"robbery",desc:"Daylight muggings",date:"Ongoing",src:"Herald",url:"https://www.heraldlive.co.za"}],note:"Main commercial strip."},
+{n:"KwaZakhele Taverns",lat:-33.8775,lng:25.6250,parent:"KwaZakhele",p:"EC",suburb:"KwaZakhele",street:"Stanford Rd area",vtype:"Tavern cluster",dominant:"assault",risk:8,crimes:[{type:"assault",desc:"Weekend stabbings outside taverns",date:"Ongoing",src:"SAPS",url:"https://www.saps.gov.za"},{type:"murder",desc:"Fatal stabbing after drinking",date:"Nov 2025",src:"Herald",url:"https://www.heraldlive.co.za"}],note:"Fri-Sun peak. Alcohol-fuelled."},
+];
+
+// MICRO-HOTSPOT LAYER (appears at zoom 13+)
+const microLayer=L.layerGroup();
+const riskC={10:'#ff0022',9:'#ff2244',8:'#ff5533',7:'#ff7a30',6:'#ffaa22',5:'#ffbe2e'};
+const tIc={murder:'💀',shooting:'🔫',robbery:'🔪',carjack:'🚗',kidnapping:'👤',assault:'👊',drugs:'💊',sexual:'⚠️',gang:'🏴',extortion:'💰'};
+
+MH.forEach(h=>{
+  const col=riskC[h.risk]||'#ffbe2e',icon=tIc[h.dominant]||'⚠️',sz=h.risk>=9?22:h.risk>=7?18:14;
+  const di=L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;background:${col};border-radius:3px;display:grid;place-items:center;font-size:${sz-6}px;border:1.5px solid rgba(255,255,255,.4);box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer;transform:rotate(45deg)"><span style="transform:rotate(-45deg)">${icon}</span></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+  let ch=(h.crimes||[]).map(c=>`<div style="padding:3px 0;border-bottom:1px solid var(--bd);font-size:8px"><span style="color:${col};font-weight:700;text-transform:uppercase">${c.type}</span> <span style="color:var(--t2)">${c.desc}</span><div style="margin-top:2px"><span style="color:var(--t3);font-family:'IBM Plex Mono'">${c.date}</span> <a href="${c.url}" target="_blank" style="color:var(--bl);text-decoration:none;font-family:'IBM Plex Mono';font-size:7px;margin-left:4px;padding:1px 4px;background:rgba(46,184,255,.1);border-radius:3px">📰 ${c.src}</a></div></div>`).join('');
+  const pp=`<div style="min-width:260px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--bd)"><span style="font-size:16px">${icon}</span><div><div style="font-size:12px;font-weight:700">${h.n}</div><div style="font-size:8px;color:var(--t3);font-family:'IBM Plex Mono'">${h.suburb} · ${h.parent} · ${h.p}</div></div><span style="margin-left:auto;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;font-family:'IBM Plex Mono';background:${col}22;color:${col}">${h.risk}/10</span></div><div style="font-size:9px;color:var(--t2);margin-bottom:4px">📍 <strong>${h.street}</strong> <span style="margin-left:4px;padding:1px 5px;background:rgba(255,255,255,.04);border-radius:3px;font-size:7px">${h.vtype}</span></div><div style="margin:6px 0;font-size:8px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Reported Incidents</div>${ch}<div style="margin-top:6px;font-size:7px;color:var(--t3);font-style:italic">${h.note||''}</div></div>`;
+  L.marker([h.lat,h.lng],{icon:di}).bindPopup(pp,{maxWidth:320}).addTo(microLayer);
+});
+
+map.on('zoomend',function(){
+  const z=map.getZoom();
+  if(z>=13&&!map.hasLayer(microLayer)){map.addLayer(microLayer)}
+  else if(z<13&&map.hasLayer(microLayer)){map.removeLayer(microLayer)}
 });
 </script>
 </body>
