@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RydeQuest Privacy Notice — How we collect, use, and protect your personal data across the GCC region.">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a1918'/><text x='50' y='68' text-anchor='middle' font-family='sans-serif' font-weight='800' font-size='48' fill='%2300b894'>RQ</text></svg>">
+<title>Privacy Notice — RydeQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#fafaf8;--white:#ffffff;--off:#f4f4f1;--cream:#eeeee9;
+  --border:#e0dfda;--border-hover:#c8c7c2;
+  --gray-dim:#918f88;--gray:#8a8882;--gray-dark:#6a6862;
+  --text:#4a4842;--heading:#1a1918;--black:#111110;
+  --accent:#00b894;--accent-bright:#00d4aa;
+  --accent-dim:rgba(0,184,148,0.06);--accent-med:rgba(0,184,148,0.12);--accent-glow:rgba(0,184,148,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:0 48px}
+
+/* Topbar */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,250,248,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;max-width:1200px;margin:0 auto}
+.logo{display:flex;align-items:center;text-decoration:none;gap:2px;position:relative}
+.logo-text{font-family:'Outfit',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.5px;color:var(--heading)}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:1px;display:inline-block}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:13px;font-weight:500;letter-spacing:0.5px;color:var(--gray);text-decoration:none;transition:color 0.2s;text-transform:uppercase}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{font-size:13px;font-weight:600;letter-spacing:0.5px;color:var(--white)!important;background:var(--black);padding:10px 24px;border-radius:6px;text-transform:uppercase;transition:all 0.2s}
+.nav-cta:hover{background:var(--accent);transform:translateY(-1px)}
+@media(max-width:768px){.topbar-inner{padding:0 24px}.nav-links{display:none}}
+
+/* Hero */
+.hero{padding:140px 0 64px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,var(--accent-dim) 0%,var(--bg) 100%)}
+.hero-inner{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 48px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(36px,5vw,56px);color:var(--heading);font-weight:400;line-height:1.15;margin-bottom:16px}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{font-size:18px;color:var(--gray-dark);line-height:1.7;font-weight:300;margin-bottom:24px}
+.hero-meta{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;font-size:14px;color:var(--gray)}
+.hero-meta span{display:flex;align-items:center;gap:6px}
+.hero-meta strong{color:var(--heading);font-weight:600}
+
+/* Content */
+.content{max-width:800px;margin:0 auto;padding:64px 24px 100px}
+.section{margin-bottom:48px}
+.section h2{font-family:'Instrument Serif',serif;font-size:28px;color:var(--heading);font-weight:400;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--accent)}
+.section h3{font-size:18px;font-weight:600;color:var(--heading);margin:24px 0 12px}
+.section p{margin-bottom:16px;line-height:1.7;font-weight:300}
+.section ul{margin:0 0 16px 0;list-style:none}
+.section ul li{position:relative;padding-left:24px;margin-bottom:10px;line-height:1.7;font-weight:300}
+.section ul li::before{content:'';position:absolute;left:0;top:10px;width:8px;height:8px;background:var(--accent);border-radius:50%}
+.section strong{color:var(--heading);font-weight:600}
+.section a{color:var(--accent);text-decoration:underline;font-weight:500}
+
+.highlight{background:var(--accent-dim);border-left:4px solid var(--accent);padding:20px 24px;border-radius:0 8px 8px 0;margin:24px 0}
+.highlight p{margin-bottom:0;font-weight:500;color:var(--heading)}
+
+.info-table{width:100%;border-collapse:collapse;margin:16px 0 24px;border-radius:8px;overflow:hidden}
+.info-table th{background:var(--accent);color:#fff;padding:12px 16px;text-align:left;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px}
+.info-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:15px;font-weight:300}
+.info-table tr:nth-child(even) td{background:var(--off)}
+
+/* Footer */
+.footer{background:var(--black);padding:64px 0 40px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:56px}
+.footer-brand p{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin-top:16px;max-width:300px;font-weight:300}
+.footer-col h5{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent-bright);margin-bottom:20px}
+.footer-col a{display:block;font-size:14px;color:rgba(255,255,255,0.45);text-decoration:none;margin-bottom:12px;font-weight:400;transition:color 0.2s}
+.footer-col a:hover{color:var(--white)}
+.footer-bar{border-top:1px solid rgba(255,255,255,0.08);padding-top:28px;display:flex;justify-content:space-between;align-items:center}
+.footer-bar p{font-size:13px;color:rgba(255,255,255,0.25)}
+.footer-social{display:flex;gap:16px}
+.footer-social a{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;transition:all 0.2s;text-decoration:none}
+.footer-social a:hover{border-color:var(--accent);background:rgba(0,184,148,0.1)}
+.footer-social svg{width:16px;height:16px;stroke:rgba(255,255,255,0.5);fill:none;stroke-width:1.5}
+.footer-social a:hover svg{stroke:var(--accent)}
+@media(max-width:1024px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.container{padding:0 24px}.hero-inner{padding:0 24px}.content{padding:40px 20px 80px}.footer-grid{grid-template-columns:1fr;gap:32px}.footer-bar{flex-direction:column;gap:16px;text-align:center}}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="logo"><span class="logo-text">RydeQuest</span><span class="logo-dot"></span></a>
+    <nav class="nav-links">
+      <a href="index.html#services">Services</a>
+      <a href="index.html#approach">Approach</a>
+      <a href="index.html#insights">Insights</a>
+      <a href="index.html#contact" class="nav-cta">Get in Touch</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Privacy <em>Notice</em></h1>
+    <p>How RydeQuest collects, uses, and protects your personal data across the GCC region.</p>
+    <div class="hero-meta">
+      <span><strong>Effective:</strong>&nbsp;February 2026</span>
+      <span><strong>Version:</strong>&nbsp;1.0</span>
+      <span><strong>Last Updated:</strong>&nbsp;27 February 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- 1 -->
+  <div class="section">
+    <h2>1. Who We Are</h2>
+    <p>RydeQuest is an executive search and HR advisory firm operating across the Gulf Cooperation Council (GCC) region. We are the data controller for the personal data described in this notice.</p>
+    <table class="info-table">
+      <tr><th>Contact</th><th>Details</th></tr>
+      <tr><td>Data Controller</td><td>RydeQuest</td></tr>
+      <tr><td>Data Protection Officer</td><td><a href="mailto:privacy@rydequest.com">privacy@rydequest.com</a></td></tr>
+      <tr><td>General Enquiries</td><td><a href="mailto:hello@rydequest.com">hello@rydequest.com</a></td></tr>
+      <tr><td>Website</td><td><a href="https://rydequest-max.github.io">rydequest-max.github.io</a></td></tr>
+    </table>
+  </div>
+
+  <!-- 2 -->
+  <div class="section">
+    <h2>2. Data We Collect</h2>
+    <p>When you submit a CV, use our contact form, or otherwise interact with RydeQuest, we may collect and process the following categories of personal data:</p>
+    <table class="info-table">
+      <tr><th>Category</th><th>Examples</th></tr>
+      <tr><td>Identity Data</td><td>Full name, nationality, date of birth, photograph (if included in CV)</td></tr>
+      <tr><td>Contact Data</td><td>Email address, phone number, postal address</td></tr>
+      <tr><td>Professional Data</td><td>Work history, education, qualifications, certifications, skills, references</td></tr>
+      <tr><td>Preference Data</td><td>Desired role, salary expectations, location preferences, availability</td></tr>
+      <tr><td>Communication Data</td><td>Records of correspondence between you and RydeQuest</td></tr>
+      <tr><td>Technical Data</td><td>IP address and browser information (when using our website)</td></tr>
+    </table>
+    <div class="highlight">
+      <p>We advise candidates not to include unnecessary sensitive information (such as health data, religious affiliation, or political opinions) in their CVs. Where sensitive data is provided, it will only be processed where strictly necessary or with your explicit additional consent.</p>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="section">
+    <h2>3. How We Collect Your Data</h2>
+    <h3>Website Submission</h3>
+    <p>When you submit your CV or enquiry through our website, you are required to actively confirm your consent by selecting the consent checkbox before the form can be submitted. This constitutes your informed, affirmative consent to the processing described in this notice.</p>
+    <h3>Email Submission</h3>
+    <p>When you email your CV to us (e.g., to careers@rydequest.com or hello@rydequest.com), you will receive an automated acknowledgement email containing this Privacy Notice. By submitting your CV via email, you consent to the processing of your personal data as described herein. You have a <strong>14-day opt-out window</strong> from the date of the acknowledgement email to withdraw consent and request deletion of your data.</p>
+    <h3>Third-Party Platforms</h3>
+    <p>Where we receive your CV from job boards, recruitment platforms, or referral partners, we will send you a direct notification within 5 business days providing this Privacy Notice and a 14-day opt-out window.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="section">
+    <h2>4. Consent Through Submission</h2>
+    <div class="highlight">
+      <p>By submitting your CV or enquiry to RydeQuest through any channel, you expressly consent to the processing of your personal data as described in this Privacy Notice.</p>
+    </div>
+    <p>Your consent covers the following processing activities:</p>
+    <ul>
+      <li>Storage of your CV and associated data in our secure candidate database</li>
+      <li>Review and assessment of your profile for current and future opportunities</li>
+      <li>Sharing your profile with our clients for candidate-role matching (with additional specific consent before sharing with named clients)</li>
+      <li>Contacting you about relevant job opportunities, industry insights, and our services</li>
+      <li>Anonymised, aggregated analysis for market insights and reporting</li>
+      <li>Retention as specified in our data retention schedule</li>
+    </ul>
+  </div>
+
+  <!-- 5 -->
+  <div class="section">
+    <h2>5. Legal Bases for Processing</h2>
+    <table class="info-table">
+      <tr><th>Legal Basis</th><th>Application</th></tr>
+      <tr><td>Consent</td><td>Your voluntary submission constitutes consent for recruitment processing</td></tr>
+      <tr><td>Contractual Necessity</td><td>Processing necessary for pre-contractual steps when you apply for a specific role</td></tr>
+      <tr><td>Legitimate Interest</td><td>Maintaining a talent database to fulfil our core business as an executive search firm</td></tr>
+      <tr><td>Legal Obligation</td><td>Where processing is required to comply with applicable GCC labour or data protection laws</td></tr>
+    </table>
+  </div>
+
+  <!-- 6 -->
+  <div class="section">
+    <h2>6. Who We Share Your Data With</h2>
+    <p>We may share your personal data with the following categories of recipients:</p>
+    <ul>
+      <li><strong>Our Clients:</strong> Organisations seeking to fill roles. We will seek additional specific consent before sharing your profile with a named client.</li>
+      <li><strong>Service Providers:</strong> IT hosting, CRM systems, assessment platforms, and other processors acting on our behalf under Data Processing Agreements.</li>
+      <li><strong>Regulatory Authorities:</strong> Where required by law in any GCC jurisdiction.</li>
+      <li><strong>Professional Advisors:</strong> Legal, audit, and compliance advisors where necessary.</li>
+    </ul>
+    <p>We do not sell your personal data to any third party.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="section">
+    <h2>7. Cross-Border Data Transfers</h2>
+    <p>As a GCC-wide firm, your data may be transferred between our offices in the UAE, Saudi Arabia, Qatar, Bahrain, Kuwait, and Oman. Where your data is transferred outside the jurisdiction in which it was collected, we ensure appropriate safeguards are in place, including Standard Contractual Clauses and Intra-Group Data Transfer Agreements, in compliance with local data protection laws.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="section">
+    <h2>8. How Long We Keep Your Data</h2>
+    <table class="info-table">
+      <tr><th>Data Category</th><th>Retention Period</th></tr>
+      <tr><td>Active candidate profiles</td><td>3 years from last engagement or consent renewal</td></tr>
+      <tr><td>Placed candidate records</td><td>7 years (contractual and regulatory obligations)</td></tr>
+      <tr><td>Unsuccessful applicant data</td><td>1 year (unless consent for future opportunities is given)</td></tr>
+      <tr><td>Client engagement records</td><td>7 years (contractual and audit requirements)</td></tr>
+      <tr><td>Communication records</td><td>3 years from last interaction</td></tr>
+    </table>
+    <p>After the applicable retention period, your data will be securely deleted or anonymised.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="section">
+    <h2>9. Your Rights</h2>
+    <p>Under GCC data protection laws, you have the following rights regarding your personal data:</p>
+    <table class="info-table">
+      <tr><th>Right</th><th>What It Means</th></tr>
+      <tr><td>Access</td><td>Request a copy of the personal data we hold about you</td></tr>
+      <tr><td>Rectification</td><td>Request correction of inaccurate or incomplete data</td></tr>
+      <tr><td>Erasure</td><td>Request deletion of your data where it is no longer needed</td></tr>
+      <tr><td>Restriction</td><td>Request that we limit the processing of your data</td></tr>
+      <tr><td>Portability</td><td>Receive your data in a structured, machine-readable format</td></tr>
+      <tr><td>Objection</td><td>Object to processing for marketing or survey purposes</td></tr>
+      <tr><td>Withdraw Consent</td><td>Withdraw your consent at any time without affecting prior processing</td></tr>
+    </table>
+    <p>To exercise any of these rights, please contact us at <strong><a href="mailto:privacy@rydequest.com">privacy@rydequest.com</a></strong>. We will respond within 30 calendar days.</p>
+  </div>
+
+  <!-- 10 -->
+  <div class="section">
+    <h2>10. Withdrawing Your Consent</h2>
+    <p>You may withdraw your consent at any time by:</p>
+    <ul>
+      <li>Emailing <strong><a href="mailto:privacy@rydequest.com">privacy@rydequest.com</a></strong> with your request</li>
+      <li>Clicking the unsubscribe link in any communication we send you</li>
+      <li>Replying to the auto-acknowledgement email within 14 days of your submission</li>
+    </ul>
+    <p>Upon withdrawal, we will cease processing your data within 15 business days, securely delete your records from active systems, and send you written confirmation. Withdrawal does not affect the lawfulness of processing prior to withdrawal.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="section">
+    <h2>11. How We Protect Your Data</h2>
+    <p>We implement robust technical and organisational security measures, including:</p>
+    <ul>
+      <li>AES-256 encryption for data at rest and TLS 1.2+ for data in transit</li>
+      <li>Role-based access controls with multi-factor authentication</li>
+      <li>Regular security assessments and annual penetration testing</li>
+      <li>Secure data disposal procedures for all expired records</li>
+    </ul>
+  </div>
+
+  <!-- 12 -->
+  <div class="section">
+    <h2>12. Data Breaches</h2>
+    <p>In the event of a data breach affecting your personal data, we will notify the relevant regulatory authority and you directly in accordance with applicable GCC data protection laws. We will inform you of the nature of the breach, the likely consequences, and the measures we have taken to address it.</p>
+  </div>
+
+  <!-- 13 -->
+  <div class="section">
+    <h2>13. Complaints</h2>
+    <p>If you are not satisfied with how we handle your personal data, you have the right to lodge a complaint with the relevant data protection authority in your jurisdiction:</p>
+    <table class="info-table">
+      <tr><th>Country</th><th>Authority</th></tr>
+      <tr><td>UAE</td><td>UAE Data Office</td></tr>
+      <tr><td>Saudi Arabia</td><td>Saudi Data & AI Authority (SDAIA)</td></tr>
+      <tr><td>Qatar</td><td>Compliance & Data Protection Department (CDP)</td></tr>
+      <tr><td>Bahrain</td><td>Personal Data Protection Authority</td></tr>
+      <tr><td>Kuwait</td><td>CITRA</td></tr>
+      <tr><td>Oman</td><td>Ministry of Transport, Communications & Information Technology</td></tr>
+    </table>
+  </div>
+
+  <!-- 14 -->
+  <div class="section">
+    <h2>14. Changes to This Notice</h2>
+    <p>We may update this Privacy Notice from time to time. Material changes will be communicated to you via email or a prominent notice on our website. The "Last Updated" date at the top of this page reflects the most recent revision. We encourage you to review this notice periodically.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="logo" style="margin-bottom:0"><span class="logo-text" style="color:#fff">RydeQuest</span><span class="logo-dot"></span></a><p>The GCC's boutique executive search and HR advisory firm. Quality over quantity, always.</p></div>
+    <div class="footer-col"><h5>Services</h5><a href="index.html#services">Executive Search</a><a href="index.html#services">HR Audit & Advisory</a><a href="index.html#services">HR Navigation</a><a href="index.html#services">Emiratisation Advisory</a></div>
+    <div class="footer-col"><h5>Company</h5><a href="index.html#approach">Our Approach</a><a href="index.html#insights">Insights</a><a href="#">Careers</a><a href="privacy.html">Privacy Notice</a></div>
+    <div class="footer-col"><h5>Connect</h5><a href="mailto:hello@rydequest.com">hello@rydequest.com</a><a href="#">Abu Dhabi, UAE | GCC-Wide</a><a href="#">LinkedIn</a></div>
+  </div>
+  <div class="footer-bar"><p>&copy; 2026 RydeQuest. All rights reserved.</p>
+    <div class="footer-social">
+      <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+      <a href="#" aria-label="Email"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></a>
+    </div>
+  </div>
+</div></footer>
+
+</body>
+</html>
